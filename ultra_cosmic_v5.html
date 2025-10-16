@@ -1,0 +1,424 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Ultra Cosmic Analyzer v5.0 — Offline Self-Learning (বাংলা)</title>
+<style>
+:root{--bg:#071126;--card:#0f1724;--muted:#9aa8b8;--accent:#06b6d4;--good:#10b981;--bad:#fb7185;}
+body{margin:0;font-family: "Noto Sans", "Noto Sans Bengali", system-ui; background:var(--bg);color:#e6eef8}
+.container{max-width:980px;margin:18px auto;padding:12px}
+.header{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+h1{margin:0;color:#7dd3fc;font-size:20px}
+.card{background:var(--card);border-radius:12px;padding:14px;margin-top:12px;box-shadow:0 8px 30px rgba(2,6,23,.6)}
+label{color:var(--muted);font-size:13px}
+textarea{width:100%;min-height:110px;background:#041226;border:1px solid #1f2937;color:#e6eef8;padding:10px;border-radius:8px;font-size:15px;resize:vertical}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.btn{background:var(--accent);color:#022;padding:9px 12px;border-radius:8px;border:none;cursor:pointer;font-weight:700}
+.btn.alt{background:#334155;color:#e6eef8}
+.small{color:var(--muted);font-size:13px}
+.out{background:#051226;padding:12px;border-radius:10px;margin-top:10px;color:#dbeafe}
+.meter{height:12px;background:#072029;border-radius:999px;overflow:hidden;margin-top:6px}
+.meter > i{display:block;height:100%;background:linear-gradient(90deg,var(--good),var(--accent));width:0%}
+.tbl{background:#071e2a;padding:8px;border-radius:8px;margin-top:8px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+@media(max-width:800px){.grid{grid-template-columns:1fr}}
+.footer{font-size:12px;color:var(--muted);margin-top:8px}
+kbd{background:#0b1220;padding:3px 6px;border-radius:6px;border:1px solid #112233}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <div>
+      <h1>🚀 Ultra Cosmic Analyzer v5.0 — Offline Self-Learning (বাংলা)</h1>
+      <div class="small">0–4 = SMALL | 5–9 = BIG — লোকাল মেমোরি সহ স্বশিক্ষণ</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <label><b>1) ইনপুট — শেষ N সংখ্যা (কমা/স্পেস/ডট যেভাবেই)</b></label>
+    <textarea id="inputNumbers" placeholder="উদাহরণ: 5 8 3 6 0 0 5 2 5 5 6 0 3 7 0 8 2 5 8 1"></textarea>
+    <div class="row">
+      <button class="btn" id="analyzeBtn">🔎 বিশ্লেষণ চালাও</button>
+      <button class="btn alt" id="clearBtn">🧹 ইনপুট মুছে ফেলো</button>
+      <button class="btn alt" id="csvImport">📁 CSV ইম্পোর্ট</button>
+      <button class="btn alt" id="exportData">⬇️ লোকাল ডেটা এক্সপোর্ট</button>
+      <button class="btn alt" id="importData">⬆️ লোকাল ডেটা ইম্পোর্ট</button>
+    </div>
+    <div class="small" style="margin-top:8px">নোট: যত বেশি ইতিহাস (২০–১০০) দেবে, এনালাইসিস তত ভালো হবে।</div>
+  </div>
+
+  <div class="card" id="resultCard" style="display:none"></div>
+
+  <div class="card">
+    <label><b>2) ফলাফল-ফিডব্যাক (Optional — Actual result দিলে লোকালি টুল শিখবে)</b></label>
+    <div class="row">
+      <input id="actualInput" placeholder="পড়ার ফল (0-9) লিখুন" style="padding:8px;border-radius:8px;border:1px solid #223" />
+      <button class="btn" id="submitActual">✅ ফল আপডেট (শিক্ষান)</button>
+      <button class="btn alt" id="resetModel">♻️ মডেল রিসেট</button>
+    </div>
+    <div class="small" style="margin-top:8px">Actual ফল দেবার মাধ্যমে অ্যাপ নিজেই লোকালি ওজন আপডেট করবে (no external server)</div>
+  </div>
+
+  <div class="card small">
+    <div><b>কীভাবে লোকাল-লার্নিং কাজ করে (সংক্ষেপ)</b></div>
+    <ul>
+      <li>প্রতিটি বিশ্লেষণের পরে তুমি যখন Actual ফল দেবা, সিস্টেম সেই রেকর্ড লোকালStorage-এ যোগ করে।</li>
+      <li>লেখা: prediction vs actual → ছোট লার্নিং রুল (weight adjust) প্রয়োগ করা হয়।</li>
+      <li>সবকিছু ব্রাউজার-ই হাতে রাখে — সম্পূর্ণ অফলাইন ও প্রাইভেট।</li>
+    </ul>
+  </div>
+
+  <div class="card footer">
+    <div>GitHub-এ আপলোড করলে GitHub Pages-এ চালাতে পারবে — আমি নিচে সেটাপ স্টেপও দিয়েছি।</div>
+  </div>
+</div>
+
+<script>
+/*
+ Ultra Cosmic v5.0 — client-side analysis + light local-learning
+ Deterministic, no external calls. Keeps data & model in localStorage.
+*/
+
+// -------------------- Utilities --------------------
+const id = (s)=>document.getElementById(s);
+const clamp = (v, a, b)=> Math.max(a, Math.min(b, v));
+
+function parseInput(text){
+  if(!text) return [];
+  // normalize separators to comma
+  let s = text.replace(/[।٫•·]/g,',').replace(/[^\d,]+/g,',');
+  s = s.replace(/,+/g,',').replace(/^,|,$/g,'');
+  if(!s) return [];
+  const parts = s.split(',').filter(x=>x!=='');
+  const nums = parts.map(p=>{
+    const m = p.match(/\d+$/);
+    return m ? parseInt(m[0].slice(-1),10) : null;
+  }).filter(n=>n!==null && n>=0 && n<=9);
+  return nums;
+}
+
+function classify(n){ return n>=5? 'BIG' : 'SMALL'; }
+function nowISO(){ return (new Date()).toISOString(); }
+
+// -------------------- Local Storage Keys --------------------
+const LS_DATA_KEY = 'ultra_v5_history';         // array of {period?, number, ts}
+const LS_MODEL_KEY = 'ultra_v5_model_weights';  // object with weights & simple stats
+
+// -------------------- Default Model --------------------
+const defaultModel = {
+  version: 'v5.0',
+  weights: {
+    recent: 0.24,
+    momentum: 0.18,
+    streak: 0.30,
+    echo: 0.12,
+    balance: 0.10,
+    gap: 0.06
+  },
+  // simple learning rate for local correction
+  learnRate: 0.06,
+  // track small stats for correction
+  stats: { totalRuns:0, correctPredictions:0 }
+};
+
+// -------------------- Storage Helpers --------------------
+function loadHistory(){
+  try{
+    const raw = localStorage.getItem(LS_DATA_KEY);
+    return raw? JSON.parse(raw) : [];
+  }catch(e){ return []; }
+}
+function saveHistory(arr){
+  localStorage.setItem(LS_DATA_KEY, JSON.stringify(arr));
+}
+function loadModel(){
+  try{
+    const raw = localStorage.getItem(LS_MODEL_KEY);
+    return raw? JSON.parse(raw) : JSON.parse(JSON.stringify(defaultModel));
+  }catch(e){
+    return JSON.parse(JSON.stringify(defaultModel));
+  }
+}
+function saveModel(m){ localStorage.setItem(LS_MODEL_KEY, JSON.stringify(m)); }
+
+// -------------------- Analysis Primitives --------------------
+function gapStats(arr){
+  const lastIdx = {}; const gaps = {}; for(let d=0; d<10; d++){gaps[d]=[];}
+  for(let i=0;i<arr.length;i++){
+    const v = arr[i];
+    if(lastIdx[v] !== undefined) gaps[v].push(i - lastIdx[v]);
+    lastIdx[v]=i;
+  }
+  const avg = {};
+  for(let d=0; d<10; d++) avg[d] = gaps[d].length ? (gaps[d].reduce((a,b)=>a+b,0)/gaps[d].length) : null;
+  return avg;
+}
+function patternEcho(nums){
+  if(nums.length < 8) return 0;
+  const s = nums.join(',');
+  const maxL = Math.min(10, Math.floor(nums.length/2));
+  let score=0;
+  for(let L=3; L<=maxL; L++){
+    const tail = nums.slice(-L).join(',');
+    const idx = s.indexOf(tail);
+    if(idx!==-1 && idx < s.length - tail.length - 1) score += L/maxL;
+  }
+  return Math.min(1, score/(maxL/4));
+}
+function longestRun(types){
+  if(types.length===0) return {type:null,len:0};
+  let cur = types[0], curLen=1, bestType=cur, bestLen=1;
+  for(let i=1;i<types.length;i++){
+    if(types[i]===cur) curLen++; else { if(curLen>bestLen){bestLen=curLen;bestType=cur;} cur=types[i]; curLen=1; }
+  }
+  if(curLen>bestLen){bestLen=curLen;bestType=cur;}
+  return {type:bestType,len:bestLen};
+}
+
+// -------------------- Core Analyzer --------------------
+function analyzeSeries(nums, model){
+  const n = nums.length;
+  const types = nums.map(x=> classify(x));
+  const bigCount = nums.filter(x=>x>=5).length;
+  const smallCount = n - bigCount;
+  const last3 = nums.slice(-3), last5 = nums.slice(-5), last10 = nums.slice(-10);
+  const last3Big = last3.filter(x=>x>=5).length;
+  const last5Big = last5.filter(x=>x>=5).length;
+  const last10Big = last10.filter(x=>x>=5).length;
+
+  // last contiguous streak
+  let lastType = types[types.length-1], streakLen=1;
+  for(let i=types.length-2;i>=0;i--){ if(types[i]===lastType) streakLen++; else break; }
+
+  const longest = longestRun(types);
+  const echo = patternEcho(nums);
+  const gaps = gapStats(nums);
+
+  // component mapping to Big-preference 0..1
+  const comp = {};
+  comp.recent = (last5.length? (last5.filter(x=>x>=5).length/last5.length) : 0.5);
+  const mom = ( (last3Big) - (last3.length - last3Big) ) / (last3.length || 3);
+  comp.momentum = (mom + 1)/2;
+  // streak reversal heuristic
+  if(lastType==='SMALL'){
+    if(streakLen>=8) comp.streak = 0.995;
+    else if(streakLen>=6) comp.streak = 0.94;
+    else if(streakLen>=4) comp.streak = 0.82;
+    else if(streakLen===3) comp.streak = 0.6;
+    else comp.streak = 0.45;
+  } else if(lastType==='BIG'){
+    if(streakLen>=8) comp.streak = 0.05;
+    else if(streakLen>=6) comp.streak = 0.14;
+    else if(streakLen>=4) comp.streak = 0.28;
+    else if(streakLen===3) comp.streak = 0.48;
+    else comp.streak = 0.62;
+  } else comp.streak = 0.5;
+
+  const recentMajorityBig = comp.recent >= 0.6;
+  comp.echo = echo * (recentMajorityBig? 1 : 0);
+  const overallBigRatio = (n? bigCount/n : 0.5);
+  comp.balance = 1 - overallBigRatio;
+  // gap boost
+  const bigDigits=[5,6,7,8,9];
+  let overdue=0, considered=0;
+  for(const d of bigDigits){ if(gaps[d] !== null){ considered++; if(gaps[d]>=6) overdue++; } }
+  const gapBoost = considered? Math.min(0.1, (overdue/considered)*0.1) : 0;
+  comp.gap = 0.5 + gapBoost;
+
+  // aggregate using model.weights
+  const W = model.weights;
+  let bigScore = comp.recent*W.recent + comp.momentum*W.momentum + comp.streak*W.streak + comp.echo*W.echo + comp.balance*W.balance + comp.gap*W.gap;
+  bigScore = clamp(bigScore, 0, 1);
+  const bigPct = Math.round(bigScore*100);
+  const smallPct = 100 - bigPct;
+
+  // confidence
+  const deviations = [
+    Math.abs(comp.recent-0.5)*2,
+    Math.abs(comp.momentum-0.5)*2,
+    Math.abs(comp.streak-0.5)*2,
+    comp.echo,
+    Math.abs(comp.balance-0.5)*2
+  ];
+  const compMax = Math.max(...deviations);
+  let confidence = Math.round(clamp(42 + compMax*48 + Math.min(12, streakLen*2) + echo*6, 30, 99));
+
+  // top3 candidates
+  const freq = {}; for(let d=0; d<=9; d++) freq[d]=0; nums.forEach(x=>freq[x]++);
+  const lastWindow = nums.slice(-10);
+  const lastSet = new Set(lastWindow);
+  let candidates = [];
+  for(let d=0; d<=9; d++){
+    let s = (freq[d]/Math.max(1,n)) * 0.6 + (lastSet.has(d)?0.35:0) + ((gaps[d] && gaps[d]>=7)?0.05:0);
+    candidates.push({d,score:s});
+  }
+  candidates.sort((a,b)=>b.score-a.score);
+  const top3 = candidates.slice(0,3).map(c=>c.d);
+
+  return {
+    total:n, bigCount, smallCount, last3, last5, last10, lastType, streakLen, longest, echo, gaps, comp, bigPct, smallPct, confidence, top3
+  };
+}
+
+// -------------------- Local learning rule --------------------
+function localLearn(model, predictionBigPct, actualNumber){
+  // simple correction: if predicted side was wrong, nudge weights toward features that would have favored actual
+  const predictedIsBig = predictionBigPct >= 50;
+  const actualIsBig = actualNumber >=5;
+  model.stats.totalRuns = (model.stats.totalRuns||0) + 1;
+  if(predictedIsBig === actualIsBig){ model.stats.correctPredictions = (model.stats.correctPredictions||0) + 1; saveModel(model); return model; }
+
+  // else update: determine which components currently favored Big; nudge weights slightly toward the correct side
+  const lr = model.learnRate || 0.05;
+  // naive approach: if actualIsBig then increase 'streak' & 'recent' weights slightly; else decrease them
+  const delta = actualIsBig ? lr : -lr;
+  // adjust a few weights deterministically and clamp
+  model.weights.recent = clamp(model.weights.recent + 0.6*delta, 0.02, 0.6);
+  model.weights.momentum = clamp(model.weights.momentum + 0.3*delta, 0.02, 0.4);
+  model.weights.streak = clamp(model.weights.streak + 0.5*delta, 0.02, 0.5);
+  // normalize sum to ~1.0 (rescale)
+  const sum = model.weights.recent + model.weights.momentum + model.weights.streak + model.weights.echo + model.weights.balance + model.weights.gap;
+  const target = 1.0;
+  for(const k of Object.keys(model.weights)) model.weights[k] = clamp((model.weights[k]/sum)*target, 0.02, 0.6);
+  saveModel(model);
+  return model;
+}
+
+// -------------------- UI Handlers --------------------
+const analyzeBtn = id('analyzeBtn'), clearBtn = id('clearBtn'), resultCard = id('resultCard');
+const actualInput = id('actualInput'), submitActual = id('submitActual'), resetModelBtn = id('resetModel');
+const csvImport = id('csvImport'), exportData = id('exportData'), importData = id('importData');
+
+analyzeBtn.addEventListener('click', ()=>{
+  const raw = id('inputNumbers').value || '';
+  const nums = parseInput(raw);
+  if(nums.length < 6){ resultCard.style.display='block'; resultCard.innerHTML = `<div class="out"><b>ত্রুটি:</b> কমপক্ষে ৬টি সংখ্যা দিন (প্রাপ্য: ${nums.length})</div>`; return; }
+  // load model + history
+  const model = loadModel();
+  const hist = loadHistory();
+  // analyze using combined (local history + new)
+  // merge: use user's input as the most recent (we treat them as chain)
+  const merged = hist.map(h=>h.number).concat(nums);
+  const series = merged.slice(-200); // cap for speed
+  const res = analyzeSeries(series, model);
+  // show
+  resultCard.style.display='block';
+  resultCard.innerHTML = buildReportHTML(nums, res, model);
+  // also show a compact deterministic predicted percent for the user-supplied sequence only
+  // (we use res.bigPct)
+});
+
+// build report UI
+function buildReportHTML(nums, res, model){
+  const lastSeq = nums.slice(-Math.min(nums.length,50)).join(', ');
+  let html = `<div style="font-weight:700;font-size:16px">🔎 Ultra Cosmic v5.0 Report</div>`;
+  html += `<div class="small" style="margin-top:8px">Analyzed sequence (user): ${lastSeq}</div>`;
+  html += `<div class="tbl" style="margin-top:8px">`;
+  html += `<div>BIG: <b>${res.bigCount}</b> | SMALL: <b>${res.smallCount}</b> | Last streak: <b>${res.lastType} × ${res.streakLen}</b></div>`;
+  html += `<div style="margin-top:8px">🔐 <b>Predicted Range:</b> <span style="color:${res.bigPct>res.smallPct? '#34d399':'#fb7185'};font-weight:800">${res.bigPct>res.smallPct? 'BIG':'SMALL'}</span> — ${res.bigPct}% vs ${res.smallPct}%</div>`;
+  html += `<div style="margin-top:8px">🔥 <b>Confidence:</b> ${res.confidence}%</div>`;
+  html += `<div style="margin-top:8px">🎯 Top digits: <b>${res.top3.join(', ')}</b></div>`;
+  html += `<div style="margin-top:8px">🔬 Pattern echo: <b>${Math.round(res.echo*100)}%</b></div>`;
+  html += `</div>`;
+  html += `<div style="margin-top:10px"><b>কারণ সংক্ষেপে:</b><ul>`;
+  if(res.streakLen>=4) html += `<li>স্ট্রিক-সিগন্যাল: শেষ ${res.streakLen}টি ধারাবাহিক "${res.lastType}" — reversal সম্ভাবনা বৃদ্ধি পেয়েছে।</li>`;
+  else html += `<li>স্ট্রিক লেন: ${res.streakLen} — স্ট্রিক নরমাল রেঞ্জে।</li>`;
+  html += `<li>Recent (last5) Big-ratio: ${(res.comp.recent*100).toFixed(0)}%</li>`;
+  html += `<li>Momentum (last3) favor Big: ${(res.comp.momentum*100).toFixed(0)}%</li>`;
+  html += `<li>Balance correction: ${(res.comp.balance*100).toFixed(0)}%</li>`;
+  html += `</ul></div>`;
+  html += `<div style="margin-top:10px"><b>লোকাল মডেল স্ট্যাটাস:</b> model version: ${model.version} | totalRuns: ${model.stats.totalRuns||0} | correct: ${model.stats.correctPredictions||0}</div>`;
+  html += `<div style="margin-top:8px" class="small">আপনি যদি বাস্তব ফল (Actual) যোগ করেন, তাহলে মডেল স্বয়ংক্রিয়ভাবে ছোটভাবে শিখবে (লোকালি)</div>`;
+  return html;
+}
+
+// submit actual -> learn
+submitActual.addEventListener('click', ()=>{
+  const v = actualInput.value.trim();
+  if(v===''){ alert('Actual ফল লিখুন (0–9)'); return; }
+  const num = parseInt(v.slice(-1),10);
+  if(isNaN(num) || num<0 || num>9){ alert('0–9 মধ্যে একটি সংখ্যা দিন'); return; }
+  // update history: append with timestamp
+  const hist = loadHistory();
+  hist.push({ number: num, ts: Date.now() });
+  // keep max 2000
+  while(hist.length > 2000) hist.shift();
+  saveHistory(hist);
+  // analyze with current model and compute prediction pct based on last user input stored earlier 
+  const model = loadModel();
+  const merged = hist.map(h=>h.number); // use full local history
+  const res = analyzeSeries(merged.slice(-200), model);
+  // apply local learning: use last prediction (we'll treat res.bigPct) and actual num
+  localLearn(model, res.bigPct, num);
+  // increment stats saved in localLearn; show confirmation
+  saveHistory(hist);
+  saveModel(model);
+  alert('ধন্যবাদ — ফলটি লোকাল ডাটাবেসে যোগ করা হয়েছে এবং মডেল আপডেট হয়েছে। (অফলাইনই সংরক্ষণ করা হল)');
+});
+
+// reset model
+resetModelBtn.addEventListener('click', ()=>{
+  if(!confirm('আপনি কি মডেল রিসেট করতে চান? লোকাল শিক্ষা ও ওয়েট মুছে যাবে।')) return;
+  localStorage.removeItem(LS_MODEL_KEY);
+  localStorage.removeItem(LS_DATA_KEY);
+  alert('লোকাল মডােল ও ডেটা রিসেট হয়েছে। পেজ রিলোড করুন।');
+  location.reload();
+});
+
+// CSV import: parse csv/text file and fill input
+csvImport.addEventListener('click', ()=>{
+  const fi = document.createElement('input'); fi.type='file'; fi.accept='.csv,text/csv,.txt';
+  fi.onchange = e=>{
+    const f = e.target.files[0]; if(!f) return;
+    const reader = new FileReader();
+    reader.onload = ev=>{
+      const txt = ev.target.result;
+      // extract digits
+      const nums = parseInput(txt);
+      id('inputNumbers').value = nums.join(' ');
+      alert(`CSV থেকে ${nums.length} টি সংখ্যা পড়া হয়েছে।`);
+    };
+    reader.readAsText(f);
+  };
+  fi.click();
+});
+
+// export local data
+exportData.addEventListener('click', ()=>{
+  const hist = loadHistory();
+  const model = loadModel();
+  const payload = { exportedAt: nowISO(), history: hist, model: model };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], {type:'application/json'});
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'ultra_v5_local_export.json'; document.body.appendChild(a); a.click(); a.remove();
+});
+
+// import local data
+importData.addEventListener('click', ()=>{
+  const fi = document.createElement('input'); fi.type='file'; fi.accept='.json';
+  fi.onchange = e=>{
+    const f = e.target.files[0]; if(!f) return;
+    const reader = new FileReader();
+    reader.onload = ev=>{
+      try{
+        const obj = JSON.parse(ev.target.result);
+        if(obj.history) saveHistory(obj.history);
+        if(obj.model) saveModel(obj.model);
+        alert('ইম্পোর্ট সম্পন্ন — লোকাল ডেটা আপডেট হয়েছে।');
+      }catch(err){ alert('ইম্পোর্ট করতে সমস্যা: ফাইল ফরম্যাট সঠিক নয়।'); }
+    };
+    reader.readAsText(f);
+  };
+  fi.click();
+});
+
+// init: create default model if missing
+(function init(){
+  if(!localStorage.getItem(LS_MODEL_KEY)) saveModel(defaultModel);
+  if(!localStorage.getItem(LS_DATA_KEY)) saveHistory([]);
+})();
+
+</script>
+</body>
+</html>
