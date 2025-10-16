@@ -604,5 +604,50 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 });
 </script>
+  <script>
+  // Local Storage দিয়ে Win/Loss ট্র্যাকিং
+  let stats = JSON.parse(localStorage.getItem("wingo_stats")) || {
+    total: 0,
+    wins: 0,
+    losses: 0
+  };
+
+  // স্ক্রিনে দেখানোর জন্য ডায়নামিক UI
+  function updateStatsDisplay() {
+    let acc = stats.total > 0 ? ((stats.wins / stats.total) * 100).toFixed(1) : 0;
+    document.getElementById("totalRounds").innerText = stats.total;
+    document.getElementById("wins").innerText = stats.wins;
+    document.getElementById("losses").innerText = stats.losses;
+    document.getElementById("accuracy").innerText = acc + "%";
+  }
+
+  // রেজাল্ট যোগ করা ফাংশন
+  function recordResult(resultType) {
+    stats.total++;
+    if (resultType === "win") stats.wins++;
+    else stats.losses++;
+
+    localStorage.setItem("wingo_stats", JSON.stringify(stats));
+    updateStatsDisplay();
+  }
+
+  // স্ক্রিনে দেখানোর জন্য একটি ছোট সেকশন বানানো হচ্ছে
+  document.addEventListener("DOMContentLoaded", function () {
+    const perfBox = document.createElement("div");
+    perfBox.innerHTML = `
+      <div style="margin-top:20px;padding:10px;border:1px solid #18d3c6;border-radius:12px;background:#001a26;color:#fff;">
+        <h3 style="color:#18d3c6;text-align:center;">📊 পারফরম্যান্স ট্র্যাকার</h3>
+        <p>মোট রাউন্ড: <span id="totalRounds">${stats.total}</span></p>
+        <p>✅ জয় (Win): <span id="wins">${stats.wins}</span></p>
+        <p>❌ হার (Loss): <span id="losses">${stats.losses}</span></p>
+        <p>🎯 একুরেসি: <span id="accuracy">0%</span></p>
+        <button onclick="recordResult('win')" style="background:#00c851;color:white;border:none;border-radius:8px;padding:6px 12px;margin-right:8px;">Win</button>
+        <button onclick="recordResult('loss')" style="background:#ff4444;color:white;border:none;border-radius:8px;padding:6px 12px;">Loss</button>
+      </div>
+    `;
+    document.body.appendChild(perfBox);
+    updateStatsDisplay();
+  });
+</script
 </body>
 </html>
