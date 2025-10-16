@@ -3,85 +3,95 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>WINGO ULTRA LEVEL X v3.6 — Bangla Number Prediction Mode</title>
+<title>WINGO ULTRA LEVEL X • Cosmic Synaptic v5.0 (Bangla)</title>
 
-<!-- Tesseract.js (client-side OCR) -->
+<!-- Tesseract.js for OCR -->
 <script src="https://unpkg.com/tesseract.js@2.1.5/dist/tesseract.min.js"></script>
 
 <style>
 :root{
-  --bg:#071022; --panel:#0b2030; --accent:#18d3c6; --muted:#9fb7d6; --glass:rgba(255,255,255,0.03);
-  --good:#34d399; --bad:#fb7185; --gold:#f6c85f;
+  --bg:#071022; --panel:#0b2030; --accent:#18d3c6; --muted:#9fb7d6;
+  --good:#34d399; --bad:#fb7185; --warn:#ffb400; --glass:rgba(255,255,255,0.03);
 }
-html,body{height:100%;margin:0;font-family:"Noto Sans Bengali",Inter,system-ui;background:var(--bg);color:#e6f6ff}
-.container{max-width:980px;margin:14px auto;padding:14px}
-.header{display:flex;align-items:center;justify-content:space-between}
-.title{font-size:18px;color:var(--accent);font-weight:700}
-.subtitle{color:var(--muted);font-size:13px}
+*{box-sizing:border-box;font-family:"Noto Sans Bengali",Inter,system-ui}
+html,body{height:100%;margin:0;background:linear-gradient(180deg,var(--bg),#061426);color:#e6f6ff}
+.container{max-width:1100px;margin:16px auto;padding:16px}
+.header{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.title{font-size:20px;color:var(--accent);font-weight:800}
+.subtitle{font-size:13px;color:var(--muted)}
+.banner{padding:12px;border-radius:12px;background:linear-gradient(90deg,#00f5d4,#00bbf9,#9b5de5);color:#001018;font-weight:800;box-shadow:0 8px 30px rgba(0,0,0,0.6)}
 .grid{display:grid;grid-template-columns:1fr 420px;gap:12px;margin-top:12px}
-@media(max-width:900px){.grid{grid-template-columns:1fr}}
-.card{background:var(--panel);border-radius:10px;padding:12px;border:1px solid rgba(255,255,255,0.02)}
-.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+@media(max-width:980px){.grid{grid-template-columns:1fr}}
+.card{background:var(--panel);padding:12px;border-radius:10px;border:1px solid rgba(255,255,255,0.03)}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .input{width:100%;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.03);background:transparent;color:inherit}
 .button{padding:10px 12px;border-radius:8px;border:none;background:var(--accent);color:#021024;cursor:pointer;font-weight:700}
-.ghost{background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--muted)}
+.ghost{background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--muted);padding:8px 10px;border-radius:8px;cursor:pointer}
 .small{font-size:13px;color:var(--muted)}
 .out{background:var(--glass);padding:10px;border-radius:8px;margin-top:8px;white-space:pre-wrap}
-.mem{font-family:monospace;font-size:12px;white-space:pre-wrap;overflow:auto;max-height:260px;padding:10px;border-radius:8px;background:rgba(0,0,0,0.2)}
+.mem{font-family:monospace;font-size:12px;white-space:pre-wrap;overflow:auto;max-height:260px;padding:10px;border-radius:8px;background:rgba(0,0,0,0.22)}
 .stat{display:flex;justify-content:space-between;padding:8px;border-radius:6px;background:rgba(255,255,255,0.02);margin-top:8px}
-.badge{padding:6px 8px;border-radius:999px;background:rgba(255,255,255,0.02);font-size:13px}
-#voteCanvas{width:100%;height:120px;background:transparent;border-radius:6px;margin-top:8px}
-.log{max-height:240px;overflow:auto;padding:6px;background:rgba(255,255,255,0.02);border-radius:8px;margin-top:8px}
+.confBox{margin-top:12px}
+.confText{font-weight:800;margin-bottom:6px}
+.confBarWrap{background:rgba(255,255,255,0.06);padding:4px;border-radius:10px;overflow:hidden}
+.confBar{height:16px;width:0%;border-radius:8px;transition:width 450ms ease, background 450ms ease;box-shadow:0 4px 12px rgba(0,0,0,0.4)}
+.voteCanvas{width:100%;height:120px;background:transparent;margin-top:8px;border-radius:6px}
+.log{max-height:200px;overflow:auto;padding:6px;background:rgba(255,255,255,0.02);border-radius:8px;margin-top:8px;font-size:13px}
+.smallBtn{padding:8px 10px;border-radius:8px;border:none;cursor:pointer}
+.footer{margin-top:12px;color:var(--muted);font-size:13px;display:flex;justify-content:space-between;align-items:center}
 </style>
 </head>
 <body>
 <div class="container">
   <div class="header">
     <div>
-      <div class="title">WINGO ULTRA LEVEL X — BANGLA (v3.6)</div>
-      <div class="subtitle">Cosmic Synaptic Ensemble • Right-Edge OCR • Number Prediction Mode</div>
+      <div class="title">WINGO ULTRA LEVEL X — COSMIC SYNAPTIC (v5.0)</div>
+      <div class="subtitle">Right-Edge OCR • Ensemble Predictor • Real Confidence • Win/Loss Tracker</div>
     </div>
-    <div class="small">ডেটা লোকালি সেভ হয় • Deterministic</div>
+    <div class="banner">🌌 COSMIC SYNAPTIC ANALYZER — বাংলা ইন্টারফেস • Local Learning</div>
   </div>
 
   <div class="grid">
-    <!-- Left: Controls & Analysis -->
+    <!-- LEFT: Controls & Analysis -->
     <div class="card">
-      <div style="font-weight:700">ইনপুট — (স্ক্রিনশট/ম্যানুয়াল)</div>
-      <div class="small" style="margin-top:6px">১) স্ক্রিনশট আপলোড করুন (পিরিয়ডের ডান পাশে বড় রঙিন সংখ্যা থাকবে)।<br>২) অথবা নিচে ম্যানুয়ালি শেষ 20 সংখ্যা (newest-first) বসান, স্পেস/কমা দিয়ে আলাদা করুন।</div>
+      <div style="font-weight:700">ইনপুট (স্ক্রিনশট বা ম্যানুয়াল)</div>
+      <div class="small" style="margin-top:6px">স্ক্রিনশট দিলে সিস্টেম পিরিয়ডের ডান পাশে থাকা বড় রঙিন সংখ্যাগুলো স্বয়ংক্রিয়ভাবে শনাক্ত করবে (প্র্যাকটিক্যালly)।</div>
 
       <div style="margin-top:8px" class="row">
-        <label style="display:inline-flex;align-items:center;gap:8px" class="uploader">
-          <input id="screenshotFile" type="file" accept="image/*" />
-          <button id="processScreenshotBtn" class="ghost">🖼️ স্ক্রিনশট প্রক্রিয়া করো</button>
-        </label>
-        <button id="pasteLastBtn" class="ghost">📋 পুরনো ইতিহাস পেস্ট করে নাও</button>
+        <input id="fileInput" type="file" accept="image/*" class="ghost" />
+        <button id="btnProcess" class="ghost smallBtn">🖼️ OCR প্রক্রিয়া করো</button>
+        <button id="btnPaste" class="ghost smallBtn">📋 পূর্বের History বসাও</button>
       </div>
 
-      <textarea id="inputBox" class="input" rows="4" placeholder="উদাহতঃ 7 2 5 5 1 8 3 6 0 2 4 5 5 2 3"></textarea>
+      <textarea id="inputBox" class="input" rows="4" placeholder="ম্যানুয়ালি শেষ 20 সংখ্যা লিখো (newest-first)। উদাহরণ: 7 5 2 2 9 0 1 5 5 3"></textarea>
 
       <div class="row" style="margin-top:8px">
-        <button id="analyzeBtn" class="button">🔎 বিশ্লেষণ করো</button>
-        <button id="predictBtn" class="button">🎯 পরবর্তী ভবিষ্যদ্বাণী</button>
-        <button id="recordOpen" class="ghost">📝 ফল রেকর্ড করো</button>
+        <button id="btnAnalyze" class="button">🔎 বিশ্লেষণ করো</button>
+        <button id="btnPredict" class="button">🎯 Predict NEXT</button>
+        <button id="btnRecord" class="ghost">📝 Record Result</button>
       </div>
 
-      <div style="margin-top:10px;font-weight:700">OCR Preview / Parsed Numbers</div>
-      <div id="ocrPreview" class="out small">কিছু নেই</div>
+      <div style="margin-top:10px;font-weight:700">OCR Preview</div>
+      <div id="ocrPreview" class="out small">কিছুও নেই</div>
 
       <div style="margin-top:10px;font-weight:700">Analysis</div>
-      <div id="analysisOut" class="out">এখনো এনালাইসিস হয়নি।</div>
+      <div id="analysisOut" class="out">এখানে বিশ্লেষণ দেখাবে।</div>
 
-      <div style="margin-top:8px;font-weight:700">Recent Log</div>
+      <div style="margin-top:10px;font-weight:700">Log</div>
       <div id="log" class="log small"></div>
     </div>
 
-    <!-- Right: Prediction, Memory, Stats -->
+    <!-- RIGHT: Prediction, Performance, State -->
     <div class="card">
       <div style="font-weight:700">PRIMARY PREDICTION</div>
-      <div id="predictionOut" class="out" style="font-size:16px">কোনো প্রেডিকশন নেই</div>
+      <div id="predictionOut" class="out" style="font-size:16px">কোনো Prediction নেই</div>
 
-      <canvas id="voteCanvas"></canvas>
+      <div class="confBox">
+        <div class="confText" id="confidenceText">CONFIDENCE: 0%</div>
+        <div class="confBarWrap"><div id="confidenceBar" class="confBar"></div></div>
+      </div>
+
+      <canvas id="voteCanvas" class="voteCanvas"></canvas>
 
       <div style="margin-top:10px;font-weight:700">CAPITAL / MARTINGALE</div>
       <div id="capOut" class="out small">Level: 1 • Next Bet: ₹10 • Total Invested: ₹0</div>
@@ -92,36 +102,41 @@ html,body{height:100%;margin:0;font-family:"Noto Sans Bengali",Inter,system-ui;b
       <div class="stat"><div>Losses</div><div id="statLoss">0</div></div>
       <div class="stat"><div>Accuracy</div><div id="statAcc">N/A</div></div>
 
-      <div style="margin-top:10px;font-weight:700">AI_MEMORY_STATE</div>
+      <div style="margin-top:10px;font-weight:700">AI_MEMORY_STATE (Export / Import)</div>
       <pre id="aiState" class="mem"></pre>
 
       <div style="margin-top:8px" class="row">
         <button id="exportBtn" class="ghost">📤 Export</button>
         <button id="importBtn" class="ghost">📥 Import</button>
-        <button id="clearHistory" class="ghost">🧹 Reset All</button>
+        <button id="clearBtn" class="ghost">🧹 Reset</button>
       </div>
     </div>
   </div>
+
+  <div class="footer">
+    <div class="small">সতর্কতা: এটি historic/pattern বিশ্লেষণী টুল — কোনো ফলাফল নিশ্চিত করে না।</div>
+    <div class="small">Made: Cosmic Synaptic v5.0</div>
+  </div>
 </div>
 
-<!-- Record Result Modal (simple) -->
-<div id="recordCard" style="display:none;position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:50">
-  <div style="background:var(--panel);padding:12px;border-radius:10px;border:1px solid rgba(255,255,255,0.03);min-width:320px">
-    <div style="font-weight:700">Record Result (PID optional)</div>
-    <input id="recPid" placeholder="PID (optional)" class="input" style="margin-top:8px"/>
-    <input id="recNum" placeholder="Number 0-9" class="input" style="margin-top:8px"/>
-    <div class="row" style="margin-top:8px;justify-content:flex-end">
-      <button id="recSubmit" class="button">Confirm & Learn</button>
-      <button id="recCancel" class="ghost">Cancel</button>
+<!-- Record modal (simple) -->
+<div id="recordModal" style="display:none;position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:60">
+  <div style="background:var(--panel);padding:12px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);min-width:320px">
+    <div style="font-weight:700">Record Result</div>
+    <input id="recPid" class="input" placeholder="PID (optional)" style="margin-top:8px"/>
+    <input id="recNumber" class="input" placeholder="Number (0-9)" style="margin-top:8px"/>
+    <div class="row" style="justify-content:flex-end;margin-top:8px">
+      <button id="recSave" class="button">Confirm & Learn</button>
+      <button id="recClose" class="ghost">Cancel</button>
     </div>
   </div>
 </div>
 
 <script>
-/* --------------------------
-   AI_MEMORY_STATE (persist)
-   --------------------------*/
-const STORAGE_KEY = 'WULX_AI_MEMORY_v3_6';
+/* -------------------------
+   Persistent AI state
+   -------------------------*/
+const STORAGE_KEY = 'WULX_COSMIC_v5';
 function defaultState(){
   return {
     last_pid:null,
@@ -134,79 +149,80 @@ function defaultState(){
     stats:{total:0,win:0,loss:0}
   };
 }
-let AI = (function(){ try{ const raw = localStorage.getItem(STORAGE_KEY); if(raw) return JSON.parse(raw);}catch(e){} const s=defaultState(); localStorage.setItem(STORAGE_KEY,JSON.stringify(s)); return s; })();
-function saveAI(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(AI)); renderState(); }
+let AI;
+try{ AI = JSON.parse(localStorage.getItem(STORAGE_KEY)) || defaultState(); } catch(e){ AI = defaultState(); }
+function saveState(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(AI)); renderState(); }
+function resetState(){ AI = defaultState(); saveState(); log('State reset'); }
 
-/* --------------------------
+/* -------------------------
    Utilities
-   --------------------------*/
+   -------------------------*/
 const $ = id => document.getElementById(id);
-const now = ()=>Date.now();
+const now = ()=> Date.now();
 function clamp(v,a,b){ return Math.max(a,Math.min(b,v)); }
-function asciiDigits(s){ if(!s) return ''; return s.replace(/[০১২৩৪৫৬৭৮৯]/g,m=> '০১২৩৪৫৬৭৮৯'.indexOf(m)); }
 
-/* --------------------------
-   Right-Edge Extractor (OCR)
-   - Uses Tesseract to get text, then for each non-empty line:
-     find tokens, prefer the right-most single digit token.
-   - Provide preview and allow manual edit in inputBox.
-   --------------------------*/
-$('processScreenshotBtn').addEventListener('click', async ()=>{
-  const files = $('screenshotFile').files;
-  if(!files || files.length===0){ alert('স্ক্রিনশট নির্বাচন করো'); return; }
-  const file = files[0];
-  $('ocrPreview').textContent = 'OCR: চলছে — দয়া করে অপেক্ষা করো...';
+/* -------------------------
+   Right-edge OCR extractor
+   - uses Tesseract to read lines,
+   - for each non-empty line chooses right-most single-digit token or last digit of last token.
+   - puts parsed numbers into inputBox (newest-first assumption).
+   -------------------------*/
+$('btnProcess').addEventListener('click', async ()=> {
+  const f = $('fileInput').files[0];
+  if(!f) { alert('প্লিজ একটি ছবি আপলোড করো'); return; }
+  $('ocrPreview').textContent = 'OCR চলছে — অপেক্ষা করো...';
   try{
     const { createWorker } = Tesseract;
     const worker = createWorker({ logger: m=>{} });
     await worker.load();
     await worker.loadLanguage('eng');
     await worker.initialize('eng');
-    await worker.setParameters({ tessedit_char_whitelist: '0123456789০১২৩৪৫৬৭৮৯: ', preserve_interword_spaces: '1' });
-    const { data:{ text } } = await worker.recognize(file);
+    await worker.setParameters({ tessedit_char_whitelist: '0123456789০১২৩৪৫৬৭৮৯: ' });
+    const { data: { text } } = await worker.recognize(f);
     await worker.terminate();
-    // split lines, for each take last single-digit token if present
-    const lines = text.split(/\r?\n/).map(l=>l.trim()).filter(Boolean);
+
+    // normalize bengali digits to ascii
+    const bengali = '০১২৩৪৫৬৭৮৯';
+    const normalized = text.replace(/[০-৯]/g, ch => bengali.indexOf(ch));
+    const lines = normalized.split(/\r?\n/).map(l=>l.trim()).filter(Boolean);
     const parsed = [];
     for(const line of lines){
-      // normalize bengali digits to ascii
-      const normalized = line.replace(/[০১২৩৪৫৬৭৮৯]/g, ch => '০১২৩৪৫৬৭৮৯'.indexOf(ch));
-      // find all digit tokens
-      const tokens = normalized.match(/\d+/g);
-      if(!tokens) continue;
-      // pick the right-most token that is a single digit, else take last digit of last token
-      let chosen = null;
-      for(let i = tokens.length-1;i>=0;i--){
-        if(tokens[i].length === 1){ chosen = tokens[i]; break; }
+      const tokens = (line.match(/\d+/g) || []);
+      if(tokens.length===0) continue;
+      // choose right-most single-digit token if exists
+      let pick = null;
+      for(let i=tokens.length-1;i>=0;i--){
+        if(tokens[i].length===1){ pick = tokens[i]; break; }
       }
-      if(!chosen){
-        // fallback: use last digit of last token
+      if(!pick){
+        // fallback: last digit of last token
         const lastTok = tokens[tokens.length-1];
-        chosen = lastTok.charAt(lastTok.length-1);
+        pick = lastTok.charAt(lastTok.length-1);
       }
-      if(chosen !== null) parsed.push(chosen);
+      if(pick!=null) parsed.push(parseInt(pick,10));
     }
+
     if(parsed.length < 6){
-      $('ocrPreview').textContent = 'INPUT ERROR: OCR–এ মাত্র ' + parsed.length + ' টি সংখ্যা পাওয়া গেছে — পরিষ্কার স্ক্রিনশট দাও।';
+      $('ocrPreview').textContent = `INPUT ERROR: OCR–এ মাত্র ${parsed.length} সংখ্যা পাওয়া গেছে — পরিষ্কার স্ক্রিনশট চেষ্টা করো।`;
       return;
     }
-    // newest-first assumption: OCR usually reads top→down = newest-first may vary; we will place as parsed order.
-    $('ocrPreview').textContent = 'OCR parsed (right-edge): ' + parsed.join(', ');
-    // place into inputBox for user to confirm/edit
+
+    // place parsed as space-separated into inputBox (assume parsed order is newest-first)
     $('inputBox').value = parsed.join(' ');
-    logAdd('OCR parsed ' + parsed.length + ' numbers');
-  } catch(err){
+    $('ocrPreview').textContent = 'OCR parsed: ' + parsed.join(', ');
+    log(`OCR parsed ${parsed.length} numbers`);
+  }catch(err){
     console.error(err);
     $('ocrPreview').textContent = 'OCR failed — console দেখো';
   }
 });
 
-/* --------------------------
-   Ensemble Methods (deterministic heuristics)
-   Return suggestions per digit/class
-   --------------------------*/
+/* -------------------------
+   Core deterministic ensemble predictor
+   - computeDigitScores(historyNums: newest-first)
+   - aggregatePrediction -> top2, topDigit, class, confidence (deterministic)
+   -------------------------*/
 function computeDigitScores(historyNums){
-  // historyNums: newest-first array of ints
   const W = Math.min(historyNums.length, 200);
   const window = historyNums.slice(0, W);
   const freq = Array(10).fill(0);
@@ -218,245 +234,214 @@ function computeDigitScores(historyNums){
     recency[v] += (W - i);
     if(lastSeen[v]===9999) lastSeen[v] = i;
   }
-  // compute run length for last class
-  let runDigit = window.length? window[0] : null;
-  let runLen = 0;
-  for(let i=0;i<window.length;i++){ if(window[i]===runDigit) runLen++; else break; }
-
-  // features to combine deterministically:
-  // - freq normalized
-  // - recency normalized
-  // - inverse lastSeen (gap)
-  // - runBoost for the repeated digit
   const maxFreq = Math.max(...freq,1);
   const maxRecency = window.length*(window.length+1)/2 || 1;
   const scores = [];
+  // detect run length of newest digit
+  let runDigit = (window.length? window[0] : null);
+  let runLen = 0;
+  for(let i=0;i<window.length;i++){ if(window[i]===runDigit) runLen++; else break; }
+
   for(let d=0; d<10; d++){
     const f = freq[d]/maxFreq;
     const r = recency[d]/maxRecency;
     const gap = 1 - clamp(lastSeen[d]/30, 0, 1);
     const runBoost = (d===runDigit)? clamp(runLen/6, 0, 1) : 0;
-    // fibonacci proximity: if d in fibonacci sequence generated from recent two
+    // fibonacci proximity boost
     let fibBoost = 0;
     if(window.length>=2){
       let a = window[1], b = window[0];
       for(let k=0;k<6;k++){ const z = (a+b)%10; if(z===d) fibBoost = 0.06; a=b; b=z; }
     }
-    // small penalty for 0 and 5 (violet damp)
-    const violet = (d===0 || d===5)? 0.9 : 1.0;
-    // base score linear combination (deterministic weights)
+    const violet = (d===0||d===5)? 0.92 : 1.0;
     const score = (f*0.46 + r*0.28 + gap*0.12 + runBoost*0.08 + fibBoost*0.06) * violet;
     scores.push({d,score,freq:freq[d],lastSeen:lastSeen[d]});
   }
-  // normalize scores to sum 1
   const sum = scores.reduce((s,x)=>s+x.score,0) || 1;
-  scores.forEach(s=>s.prob = s.score/sum);
-  // sort by score desc, tie by freq then lastSeen then smaller digit
+  scores.forEach(s=> s.prob = s.score / sum );
   scores.sort((a,b)=> b.score - a.score || b.freq - a.freq || a.lastSeen - b.lastSeen || a.d - b.d);
   return scores;
 }
 
-/* Aggregate to Top2 digits & class prediction */
 function aggregatePrediction(historyNums){
-  const digitScores = computeDigitScores(historyNums); // sorted desc
+  const digitScores = computeDigitScores(historyNums);
   const top2 = digitScores.slice(0,2).map(x=>x.d);
-  // class (BIG/SMALL) by sum of probs of digits >=5
-  const bigProb = digitScores.reduce((s,x)=> s + (x.d>=5? x.prob : 0), 0);
+  const topDigit = digitScores[0].d;
+  const bigProb = digitScores.reduce((s,x)=> s + ((x.d>=5)? x.prob : 0), 0);
   const smallProb = 1 - bigProb;
   const predictedClass = bigProb >= smallProb ? 'BIG' : 'SMALL';
-  // confidence derived from dominance ratio and spread
   const dom = digitScores[0].prob;
   const spread = dom - digitScores[1].prob;
-  // deterministic mapping to percent
-  let confidence = Math.round( clamp( (0.30 + dom*0.6 + spread*0.4) * 100, 30, 99 ) );
-  // if many signals align (runLen large & top digit frequent) boost
+  // deterministic confidence mapping
+  let confidence = Math.round(clamp((30 + dom*60 + spread*40), 30, 99));
+  // boost if long run and dominant freq
   const runLenApprox = (()=>{ let r=0; for(let i=1;i<historyNums.length;i++){ if(historyNums[i-1]===historyNums[i]) r++; else break;} return r; })();
   if(runLenApprox>=4 && digitScores[0].freq>=3) confidence = Math.max(confidence, 92);
-  return { top2, topDigit: digitScores[0].d, bigProb: Math.round(bigProb*100), smallProb: Math.round(smallProb*100), predictedClass, confidence, digitScores };
+  return { top2, topDigit, predictedClass, confidence, bigProb:Math.round(bigProb*100), smallProb:Math.round(smallProb*100), digitScores };
 }
 
-/* --------------------------
-   UI Handlers
-   --------------------------*/
-function renderPredictionBlock(agg){
+/* -------------------------
+   UI actions
+   -------------------------*/
+function renderPrediction(agg){
   $('predictionOut').innerHTML = `
     <div style="font-weight:700">SIZE: ${agg.predictedClass}  •  CONFIDENCE: ${agg.confidence}%</div>
-    <div style="margin-top:6px">TOP 2 DIGITS: <strong>${agg.top2.join(' , ')}</strong></div>
-    <div style="margin-top:6px">TOP DIGIT SUGGESTION: <span style="font-size:20px;font-weight:800">${agg.topDigit}</span></div>
-    <div style="margin-top:6px" class="small">Prob (BIG): ${agg.bigProb}% • Prob (SMALL): ${agg.smallProb}%</div>
+    <div style="margin-top:8px">TOP 2 DIGITS: <strong>${agg.top2.join(' , ')}</strong></div>
+    <div style="margin-top:8px">TOP DIGIT: <span style="font-size:22px;font-weight:800">${agg.topDigit}</span></div>
+    <div style="margin-top:6px" class="small">Prob(BIG): ${agg.bigProb}% • Prob(SMALL): ${agg.smallProb}%</div>
   `;
-  drawVotes(agg.digitScores);
-  AI.last_top_logic = 'cosmic_ensemble_v3';
-  AI.last_prediction_pid = {pid: AI.last_pid || 'NEXT', top2: agg.top2, topDigit: agg.topDigit, predictedClass: agg.predictedClass, confidence: agg.confidence};
-  saveAI();
+  updateConfidenceBar(agg.confidence);
+  drawVoteChart(agg.digitScores);
+  AI.last_top_logic = 'cosmic_ensemble_v5';
+  AI.last_prediction_pid = { pid: AI.last_pid || 'NEXT', top2: agg.top2, topDigit: agg.topDigit, predictedClass: agg.predictedClass, confidence: agg.confidence };
+  saveState();
+  log(`Predicted ${agg.predictedClass} • Top:${agg.topDigit} • ${agg.confidence}%`);
 }
 
-function drawVotes(digitScores){
+function updateConfidenceBar(conf){
+  const bar = $('confidenceBar');
+  const text = $('confidenceText');
+  const val = Math.floor(conf);
+  let color = (val>=70? '--good' : val>=45? '--warn' : '--bad');
+  // choose hex by branch
+  let hex = val>=70? '#34d399' : val>=45? '#ffb400' : '#ff3333';
+  bar.style.width = val + '%';
+  bar.style.background = hex;
+  bar.style.boxShadow = `0 6px 18px ${hex}44`;
+  text.textContent = `CONFIDENCE: ${val}%`;
+}
+
+/* draw bar chart for digit scores */
+function drawVoteChart(digitScores){
   const canvas = $('voteCanvas'); const ctx = canvas.getContext('2d');
   canvas.width = canvas.clientWidth; canvas.height = 120; ctx.clearRect(0,0,canvas.width,canvas.height);
   const w = canvas.width; const h = canvas.height; const barW = (w-20)/10;
-  const maxScore = Math.max(...digitScores.map(x=>x.score), 0.0001);
+  const max = Math.max(...digitScores.map(x=>x.score),0.0001);
   for(let i=0;i<10;i++){
     const ds = digitScores.find(x=>x.d===i) || {score:0};
-    const barH = (ds.score/maxScore) * (h-40);
+    const barH = (ds.score/max) * (h-40);
     const x = 10 + i*barW;
-    ctx.fillStyle = (i>=5? '#34d399' : '#fb7185');
-    ctx.fillRect(x, h-20-barH, barW*0.7, barH);
+    ctx.fillStyle = i>=5? '#34d399' : '#ff6b6b';
+    ctx.fillRect(x, h-20-barH, barW*0.66, barH);
     ctx.fillStyle = '#cfefff';
     ctx.font = '12px monospace';
-    ctx.fillText(i.toString(), x+6, h-4);
+    ctx.fillText(i.toString(), x + barW*0.33 - 4, h - 4);
   }
 }
 
-/* --------------------------
-   Analyze & Predict buttons
-   --------------------------*/
-$('analyzeBtn').addEventListener('click', ()=>{
-  const txt = $('inputBox').value.trim();
-  const parsed = parseInputText(txt);
-  if(parsed.numbers.length < 6){ $('analysisOut').textContent = 'INPUT ERROR: কমপক্ষে 6টি সংখ্যা দরকার।'; return; }
-  $('analysisOut').textContent = `Analyzed ${parsed.numbers.length} numbers (newest-first).`;
-  const agg = aggregatePrediction(parsed.numbers);
-  renderPredictionBlock(agg);
-  logAdd(`Analyzed ${parsed.numbers.length} numbers → Class:${agg.predictedClass} Top:${agg.topDigit} (${agg.confidence}%)`);
-});
-
-$('predictBtn').addEventListener('click', ()=>{
-  const txt = $('inputBox').value.trim();
-  let arr = parseInputText(txt).numbers;
-  if(!arr.length && AI.history_newest_first.length) arr = AI.history_newest_first.map(h=>h.number);
-  if(arr.length < 6){ alert('ইতিহাস 6+ সংখ্যার নাও, অনুগ্রহ করে ইনপুট বা ইতিহাস যোগ করো'); return; }
-  const agg = aggregatePrediction(arr);
-  renderPredictionBlock(agg);
-  logAdd(`Predict NEXT → Class:${agg.predictedClass} Top:${agg.topDigit} (${agg.confidence}%)`);
-});
-
-/* --------------------------
-   Parsing helper for manual input
-   Accepts "period:number" lines or plain digits
-   Returns newest-first numbers array and lastPeriod
-   --------------------------*/
-function parseInputText(text){
-  if(!text) return {numbers:[], lastPeriod:null};
-  text = text.replace(/\r/g, '\n');
-  const lines = text.split('\n').map(s=>s.trim()).filter(Boolean);
-  const numbers=[];
-  let lastPeriod = null;
-  for(const line of lines){
-    if(/[:\-]/.test(line) && /\d/.test(line)){
-      const parts = line.split(/[:\-]/).map(s=>s.trim()).filter(Boolean);
-      const lastTok = parts[parts.length-1];
-      const md = lastTok.match(/\d$/);
-      if(md) numbers.push(parseInt(md[0],10));
-      const left = parts[0];
-      if(left && left.length>4 && /^\d+$/.test(left)) lastPeriod = left;
-    } else {
-      const toks = line.split(/[\s,;]+/).filter(Boolean);
-      for(const t of toks){
-        const m = t.match(/[0-9]/);
-        if(m) numbers.push(parseInt(m[0],10));
-      }
-    }
+/* parse input text (manual) - accepts space/comma/newline, also "PID:number" lines */
+function parseManual(text){
+  if(!text) return [];
+  const toks = text.split(/[\s,;]+/).filter(Boolean);
+  const nums = [];
+  for(const t of toks){
+    const m = t.match(/\d/);
+    if(m) nums.push(parseInt(m[0],10));
   }
-  // newest-first: assume input provided newest-first; if user provided oldest-first they can reverse manually
-  return {numbers, lastPeriod};
+  return nums;
 }
 
-/* --------------------------
-   Record result (learning) & martingale update
-   --------------------------*/
-$('recordOpen').addEventListener('click', ()=>{ $('recordCard').style.display='block'; });
-$('recCancel').addEventListener('click', ()=>{ $('recordCard').style.display='none'; });
+/* analyze/predict buttons */
+$('btnAnalyze').addEventListener('click', ()=>{
+  const txt = $('inputBox').value.trim();
+  const nums = parseManual(txt);
+  if(nums.length < 6){ $('analysisOut').textContent = 'INPUT ERROR: কমপক্ষে 6টি সংখ্যা দিন'; return; }
+  $('analysisOut').textContent = `Analyzed ${nums.length} numbers (newest-first)`;
+  const agg = aggregatePrediction(nums);
+  renderPrediction(agg);
+});
 
-$('recSubmit').addEventListener('click', ()=>{
+$('btnPredict').addEventListener('click', ()=>{
+  let nums = parseManual($('inputBox').value.trim());
+  if(nums.length===0 && AI.history_newest_first.length) nums = AI.history_newest_first.map(h=>h.number);
+  if(nums.length < 6){ alert('ইতিহাস 6+ সংখ্যার প্রয়োজন'); return; }
+  const agg = aggregatePrediction(nums);
+  renderPrediction(agg);
+});
+
+/* -------------------------
+   Record result (learning + martingale)
+   -------------------------*/
+$('btnRecord').addEventListener('click', ()=>{ $('recordModal').style.display='block'; });
+$('recClose').addEventListener('click', ()=>{ $('recordModal').style.display='none'; });
+
+$('recSave').addEventListener('click', ()=>{
   const pid = $('recPid').value.trim() || null;
-  const nRaw = $('recNum').value.trim();
-  const n = parseInt(nRaw,10);
-  if(isNaN(n) || n<0 || n>9){ alert('0-9 সংখ্যা দিন'); return; }
-  // record
+  const n = parseInt($('recNumber').value.trim(),10);
+  if(isNaN(n) || n<0 || n>9){ alert('0–9 একটি সংখ্যা দিন'); return; }
   AI.history_newest_first.unshift({period: pid, number: n, ts: now()});
   if(AI.history_newest_first.length > 1440) AI.history_newest_first.length = 1440;
-  // update stats & martingale
+  // update stats
   AI.stats.total = (AI.stats.total||0) + 1;
+  let win = false;
   const lastPred = AI.last_prediction_pid;
-  let resultWin = false;
-  if(lastPred && lastPred.top2 && lastPred.top2.includes(n)){ resultWin = true; }
+  if(lastPred && lastPred.top2 && lastPred.top2.includes(n)) win = true;
   const actualClass = n>=5? 'BIG':'SMALL';
-  if(lastPred && lastPred.predictedClass === actualClass) resultWin = true;
-  if(resultWin){
-    AI.stats.win = (AI.stats.win||0) + 1;
-    AI.last_result = 'WIN';
-    AI.current_level = 1;
-  } else {
-    AI.stats.loss = (AI.stats.loss||0) + 1;
-    AI.last_result = 'LOSS';
-    AI.current_level = (AI.current_level||1) + 1;
-  }
+  if(lastPred && lastPred.predictedClass === actualClass) win = true;
+  if(win){ AI.stats.win = (AI.stats.win||0) + 1; AI.last_result = 'WIN'; AI.current_level = 1; }
+  else { AI.stats.loss = (AI.stats.loss||0) + 1; AI.last_result = 'LOSS'; AI.current_level = (AI.current_level||1) + 1; }
   // stake accounting (3x martingale)
   const stake = 10 * Math.pow(3, (AI.current_level||1)-1);
   AI.total_invested = (AI.total_invested||0) + stake;
   AI.last_pid = pid || AI.last_pid;
-  saveAI();
+  saveState();
+  $('recordModal').style.display='none';
   renderState();
-  $('recordCard').style.display='none';
-  logAdd(`Recorded PID:${pid||'-'} Number:${n} → ${AI.last_result}`);
+  log(`Recorded PID:${pid||'-'} Number:${n} → ${AI.last_result}`);
 });
 
-/* --------------------------
-   State rendering & helpers
-   --------------------------*/
+/* -------------------------
+   Export / Import / Reset
+   -------------------------*/
+$('exportBtn').addEventListener('click', ()=>{
+  const blob = new Blob([JSON.stringify(AI, null, 2)],{type:'application/json'});
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'wulx_ai_state.json'; a.click();
+});
+$('importBtn').addEventListener('click', ()=>{
+  const fi = document.createElement('input'); fi.type='file'; fi.accept='.json'; fi.onchange = e=>{
+    const f = e.target.files[0]; if(!f) return;
+    const r = new FileReader(); r.onload = ev=>{
+      try{ const obj = JSON.parse(ev.target.result); if(obj && obj.history_newest_first){ AI = obj; saveState(); alert('Imported'); log('Imported state'); } else alert('Invalid file'); }
+      catch(err){ alert('Import failed'); }
+    }; r.readAsText(f);
+  }; fi.click();
+});
+$('clearBtn').addEventListener('click', ()=>{ if(confirm('সব history এবং স্টেট রিসেট করতে চাও?')){ resetState(); renderState(); } });
+
+/* -------------------------
+   Logging and UI helpers
+   -------------------------*/
+function log(msg){
+  const ln = new Date().toLocaleString('bn-BD');
+  const d = document.createElement('div'); d.textContent = `${ln} — ${msg}`;
+  $('log').insertBefore(d, $('log').firstChild);
+  while($('log').childNodes.length > 200) $('log').removeChild($('log').lastChild);
+}
 function renderState(){
   $('aiState').textContent = JSON.stringify(AI, null, 2);
   $('statTotal').textContent = AI.stats.total || 0;
   $('statWin').textContent = AI.stats.win || 0;
   $('statLoss').textContent = AI.stats.loss || 0;
   const acc = AI.stats.total ? Math.round((AI.stats.win/AI.stats.total)*1000)/10 : 'N/A';
-  $('statAcc').textContent = acc === 'N/A' ? 'N/A' : acc + '%';
+  $('statAcc').textContent = (acc==='N/A'? 'N/A' : acc + '%');
   $('capOut').textContent = `Level: ${AI.current_level||1} • Next Bet: ₹${10 * Math.pow(3, (AI.current_level||1)-1)} • Total Invested: ₹${AI.total_invested||0}`;
 }
-function logAdd(txt){
-  const div = $('log');
-  const nowStr = new Date().toLocaleString('bn-BD');
-  const el = document.createElement('div'); el.textContent = `${nowStr} — ${txt}`; div.insertBefore(el, div.firstChild);
-  // keep log length reasonable
-  while(div.childNodes.length > 200) div.removeChild(div.lastChild);
-}
 
-/* export/import/reset */
-$('exportBtn').addEventListener('click', ()=>{
-  const blob = new Blob([JSON.stringify(AI, null, 2)], {type:'application/json'});
-  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'wulx_ai_memory.json'; a.click();
-});
-$('importBtn').addEventListener('click', ()=>{
-  const fi = document.createElement('input'); fi.type='file'; fi.accept='.json'; fi.onchange = e=>{
-    const f = e.target.files[0]; if(!f) return;
-    const r = new FileReader(); r.onload = ev => {
-      try{ const obj = JSON.parse(ev.target.result); if(obj && obj.history_newest_first){ AI = obj; saveAI(); alert('Imported.'); } else alert('Invalid file'); } catch(err){ alert('Import failed'); }
-    }; r.readAsText(f);
-  }; fi.click();
-});
-$('clearHistory').addEventListener('click', ()=>{
-  if(!confirm('সব history মুছে ফেলতে চাও?')) return;
-  AI = defaultState(); saveAI(); renderState(); logAdd('State reset');
-});
-
-/* Paste last history helper (from local state) */
-$('pasteLastBtn').addEventListener('click', ()=> {
-  if(!AI.history_newest_first.length) return alert('কোনো history নেই');
+/* Paste previous history into input */
+$('btnPaste').addEventListener('click', ()=> {
+  if(!AI.history_newest_first.length){ alert('কোনো স্থানীয় history নেই'); return; }
   const nums = AI.history_newest_first.slice(0,20).map(h=>h.number).join(' ');
   $('inputBox').value = nums;
-  $('ocrPreview').textContent = 'পূর্বের local history pasted.';
+  log('Local history pasted to input');
 });
 
-/* init */
+/* init UI */
 renderState();
-if(AI.history_newest_first.length){
-  logAdd('Loaded local history (' + AI.history_newest_first.length + ' records)');
-}
+log('Cosmic Analyzer v5.0 loaded');
 
-/* ensure canvas initial */
-drawVotes(Array.from({length:10},(_,i)=>({d:i,score:0.001})));
-
+/* auto-resize canvas on load */
+window.addEventListener('resize', ()=> drawVoteChart(Array.from({length:10},(_,i)=>({d:i,score:0.001})))));
+drawVoteChart(Array.from({length:10},(_,i)=>({d:i,score:0.001})));
 </script>
 </body>
 </html>
