@@ -1,653 +1,224 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="bn">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>WINGO ULTRA LEVEL X • Cosmic Synaptic v5.0 (Bangla)</title>
-
-<!-- Tesseract.js for OCR -->
-<script src="https://unpkg.com/tesseract.js@2.1.5/dist/tesseract.min.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wingo Ultra Level X — Cosmic Synaptic Analyzer</title>
 
 <style>
-:root{
-  --bg:#071022; --panel:#0b2030; --accent:#18d3c6; --muted:#9fb7d6;
-  --good:#34d399; --bad:#fb7185; --warn:#ffb400; --glass:rgba(255,255,255,0.03);
-}
-*{box-sizing:border-box;font-family:"Noto Sans Bengali",Inter,system-ui}
-html,body{height:100%;margin:0;background:linear-gradient(180deg,var(--bg),#061426);color:#e6f6ff}
-.container{max-width:1100px;margin:16px auto;padding:16px}
-.header{display:flex;justify-content:space-between;align-items:center;gap:12px}
-.title{font-size:20px;color:var(--accent);font-weight:800}
-.subtitle{font-size:13px;color:var(--muted)}
-.banner{padding:12px;border-radius:12px;background:linear-gradient(90deg,#00f5d4,#00bbf9,#9b5de5);color:#001018;font-weight:800;box-shadow:0 8px 30px rgba(0,0,0,0.6)}
-.grid{display:grid;grid-template-columns:1fr 420px;gap:12px;margin-top:12px}
-@media(max-width:980px){.grid{grid-template-columns:1fr}}
-.card{background:var(--panel);padding:12px;border-radius:10px;border:1px solid rgba(255,255,255,0.03)}
-.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-.input{width:100%;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.03);background:transparent;color:inherit}
-.button{padding:10px 12px;border-radius:8px;border:none;background:var(--accent);color:#021024;cursor:pointer;font-weight:700}
-.ghost{background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--muted);padding:8px 10px;border-radius:8px;cursor:pointer}
-.small{font-size:13px;color:var(--muted)}
-.out{background:var(--glass);padding:10px;border-radius:8px;margin-top:8px;white-space:pre-wrap}
-.mem{font-family:monospace;font-size:12px;white-space:pre-wrap;overflow:auto;max-height:260px;padding:10px;border-radius:8px;background:rgba(0,0,0,0.22)}
-.stat{display:flex;justify-content:space-between;padding:8px;border-radius:6px;background:rgba(255,255,255,0.02);margin-top:8px}
-.confBox{margin-top:12px}
-.confText{font-weight:800;margin-bottom:6px}
-.confBarWrap{background:rgba(255,255,255,0.06);padding:4px;border-radius:10px;overflow:hidden}
-.confBar{height:16px;width:0%;border-radius:8px;transition:width 450ms ease, background 450ms ease;box-shadow:0 4px 12px rgba(0,0,0,0.4)}
-.voteCanvas{width:100%;height:120px;background:transparent;margin-top:8px;border-radius:6px}
-.log{max-height:200px;overflow:auto;padding:6px;background:rgba(255,255,255,0.02);border-radius:8px;margin-top:8px;font-size:13px}
-.smallBtn{padding:8px 10px;border-radius:8px;border:none;cursor:pointer}
-.footer{margin-top:12px;color:var(--muted);font-size:13px;display:flex;justify-content:space-between;align-items:center}
+  body {
+    background: radial-gradient(circle at center, #0e1835 0%, #050914 100%);
+    color: #dce4ff;
+    font-family: 'Segoe UI', sans-serif;
+    padding: 20px;
+    text-align: center;
+  }
+
+  h1 {
+    color: #74f0ff;
+    font-size: 28px;
+    margin-bottom: 10px;
+  }
+
+  .section {
+    background: rgba(18,25,48,0.85);
+    border-radius: 16px;
+    padding: 20px;
+    margin: 18px auto;
+    max-width: 420px;
+    box-shadow: 0 0 20px rgba(0,255,255,0.08);
+  }
+
+  button {
+    background: #00c06a;
+    border: none;
+    color: white;
+    padding: 10px 16px;
+    margin: 8px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 15px;
+    font-weight: 500;
+  }
+
+  button:hover {
+    background: #00a95c;
+  }
+
+  input, textarea {
+    width: 90%;
+    background: #0b1221;
+    color: #aef;
+    border: 1px solid #2a3558;
+    border-radius: 8px;
+    padding: 8px;
+    margin-top: 6px;
+    font-size: 15px;
+  }
+
+  .confidence-bar {
+    width: 100%;
+    height: 16px;
+    background: #20293d;
+    border-radius: 10px;
+    margin-top: 10px;
+  }
+
+  .confidence-fill {
+    height: 100%;
+    border-radius: 10px;
+    width: 0%;
+    transition: width 0.6s ease;
+  }
+
+  .stats p {
+    margin: 4px 0;
+    font-size: 15px;
+  }
+
+  .title-banner {
+    background: linear-gradient(90deg, #00bcd4, #00ff88);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-size: 24px;
+    font-weight: bold;
+  }
+
+  hr {
+    border: none;
+    height: 1px;
+    background: #2a3558;
+    margin: 18px 0;
+  }
 </style>
 </head>
+
 <body>
-<div class="container">
-  <div class="header">
-    <div>
-      <div class="title">WINGO ULTRA LEVEL X — COSMIC SYNAPTIC (v5.0)</div>
-      <div class="subtitle">Right-Edge OCR • Ensemble Predictor • Real Confidence • Win/Loss Tracker</div>
-    </div>
-    <div class="banner">🌌 COSMIC SYNAPTIC ANALYZER — বাংলা ইন্টারফেস • Local Learning</div>
-  </div>
 
-  <div class="grid">
-    <!-- LEFT: Controls & Analysis -->
-    <div class="card">
-      <div style="font-weight:700">ইনপুট (স্ক্রিনশট বা ম্যানুয়াল)</div>
-      <div class="small" style="margin-top:6px">স্ক্রিনশট দিলে সিস্টেম পিরিয়ডের ডান পাশে থাকা বড় রঙিন সংখ্যাগুলো স্বয়ংক্রিয়ভাবে শনাক্ত করবে (প্র্যাকটিক্যালly)।</div>
+<h1>⚡ Wingo Ultra Level X ⚡</h1>
+<div class="title-banner">Cosmic Synaptic AI Analyzer</div>
+<p>বাংলা মোড চালু ✅</p>
 
-      <div style="margin-top:8px" class="row">
-        <input id="fileInput" type="file" accept="image/*" class="ghost" />
-        <button id="btnProcess" class="ghost smallBtn">🖼️ OCR প্রক্রিয়া করো</button>
-        <button id="btnPaste" class="ghost smallBtn">📋 পূর্বের History বসাও</button>
-      </div>
-
-      <textarea id="inputBox" class="input" rows="4" placeholder="ম্যানুয়ালি শেষ 20 সংখ্যা লিখো (newest-first)। উদাহরণ: 7 5 2 2 9 0 1 5 5 3"></textarea>
-
-      <div class="row" style="margin-top:8px">
-        <button id="btnAnalyze" class="button">🔎 বিশ্লেষণ করো</button>
-        <button id="btnPredict" class="button">🎯 Predict NEXT</button>
-        <button id="btnRecord" class="ghost">📝 Record Result</button>
-      </div>
-
-      <div style="margin-top:10px;font-weight:700">OCR Preview</div>
-      <div id="ocrPreview" class="out small">কিছুও নেই</div>
-
-      <div style="margin-top:10px;font-weight:700">Analysis</div>
-      <div id="analysisOut" class="out">এখানে বিশ্লেষণ দেখাবে।</div>
-
-      <div style="margin-top:10px;font-weight:700">Log</div>
-      <div id="log" class="log small"></div>
-    </div>
-
-    <!-- RIGHT: Prediction, Performance, State -->
-    <div class="card">
-      <div style="font-weight:700">PRIMARY PREDICTION</div>
-      <div id="predictionOut" class="out" style="font-size:16px">কোনো Prediction নেই</div>
-
-      <div class="confBox">
-        <div class="confText" id="confidenceText">CONFIDENCE: 0%</div>
-        <div class="confBarWrap"><div id="confidenceBar" class="confBar"></div></div>
-      </div>
-
-      <canvas id="voteCanvas" class="voteCanvas"></canvas>
-
-      <div style="margin-top:10px;font-weight:700">CAPITAL / MARTINGALE</div>
-      <div id="capOut" class="out small">Level: 1 • Next Bet: ₹10 • Total Invested: ₹0</div>
-
-      <div style="margin-top:10px;font-weight:700">PERFORMANCE</div>
-      <div class="stat"><div>Total Rounds</div><div id="statTotal">0</div></div>
-      <div class="stat"><div>Wins</div><div id="statWin">0</div></div>
-      <div class="stat"><div>Losses</div><div id="statLoss">0</div></div>
-      <div class="stat"><div>Accuracy</div><div id="statAcc">N/A</div></div>
-
-      <div style="margin-top:10px;font-weight:700">AI_MEMORY_STATE (Export / Import)</div>
-      <pre id="aiState" class="mem"></pre>
-
-      <div style="margin-top:8px" class="row">
-        <button id="exportBtn" class="ghost">📤 Export</button>
-        <button id="importBtn" class="ghost">📥 Import</button>
-        <button id="clearBtn" class="ghost">🧹 Reset</button>
-      </div>
-    </div>
-  </div>
-
-  <div class="footer">
-    <div class="small">সতর্কতা: এটি historic/pattern বিশ্লেষণী টুল — কোনো ফলাফল নিশ্চিত করে না।</div>
-    <div class="small">Made: Cosmic Synaptic v5.0</div>
-  </div>
+<div class="section">
+  <h2>🔢 সংখ্যা বিশ্লেষণ</h2>
+  <textarea id="numbers" rows="3" placeholder="শেষ ২০টি সংখ্যা লিখুন বা পেস্ট করুন..."></textarea><br>
+  <button onclick="analyze()">🔍 বিশ্লেষণ করো</button>
+  <p id="analysisResult"></p>
 </div>
 
-<!-- Record modal (simple) -->
-<div id="recordModal" style="display:none;position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:60">
-  <div style="background:var(--panel);padding:12px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);min-width:320px">
-    <div style="font-weight:700">Record Result</div>
-    <input id="recPid" class="input" placeholder="PID (optional)" style="margin-top:8px"/>
-    <input id="recNumber" class="input" placeholder="Number (0-9)" style="margin-top:8px"/>
-    <div class="row" style="justify-content:flex-end;margin-top:8px">
-      <button id="recSave" class="button">Confirm & Learn</button>
-      <button id="recClose" class="ghost">Cancel</button>
-    </div>
+<hr>
+
+<div class="section stats">
+  <h2>📊 Performance Tracker</h2>
+  <p>Total Rounds: <span id="totalRounds">0</span></p>
+  <p>Wins: <span id="wins">0</span></p>
+  <p>Losses: <span id="losses">0</span></p>
+  <p>Accuracy: <span id="accuracy">0%</span></p>
+  <button onclick="recordResult('win')">✅ Win</button>
+  <button onclick="recordResult('loss')">❌ Loss</button>
+  <button onclick="resetStats()">♻️ Reset</button>
+</div>
+
+<hr>
+
+<div class="section">
+  <h2>🎯 Confidence Indicator</h2>
+  <div class="confidence-bar">
+    <div id="confidenceFill" class="confidence-fill"></div>
   </div>
+  <p>Confidence: <span id="confidenceValue">0%</span></p>
+  <button onclick="generateConfidence()">🔄 আপডেট কনফিডেন্স</button>
+</div>
+
+<hr>
+
+<div class="section stats">
+  <h2>📒 Local Tracker</h2>
+  <p>Total: <span id="totalRounds2">0</span></p>
+  <p>Wins: <span id="wins2">0</span></p>
+  <p>Losses: <span id="losses2">0</span></p>
+  <p>Accuracy: <span id="accuracy2">0%</span></p>
+  <button onclick="recordLocalResult('win')">✅ Local Win</button>
+  <button onclick="recordLocalResult('loss')">❌ Local Loss</button>
+  <button onclick="resetLocal()">♻️ Reset Local</button>
 </div>
 
 <script>
-/* -------------------------
-   Persistent AI state
-   -------------------------*/
-const STORAGE_KEY = 'WULX_COSMIC_v5';
-function defaultState(){
-  return {
-    last_pid:null,
-    history_newest_first:[], // {period?, number, ts}
-    current_level:1,
-    total_invested:0,
-    last_top_logic:null,
-    last_result:'N/A',
-    last_prediction_pid:null,
-    stats:{total:0,win:0,loss:0}
-  };
-}
-let AI;
-try{ AI = JSON.parse(localStorage.getItem(STORAGE_KEY)) || defaultState(); } catch(e){ AI = defaultState(); }
-function saveState(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(AI)); renderState(); }
-function resetState(){ AI = defaultState(); saveState(); log('State reset'); }
-
-/* -------------------------
-   Utilities
-   -------------------------*/
-const $ = id => document.getElementById(id);
-const now = ()=> Date.now();
-function clamp(v,a,b){ return Math.max(a,Math.min(b,v)); }
-
-/* -------------------------
-   Right-edge OCR extractor
-   - uses Tesseract to read lines,
-   - for each non-empty line chooses right-most single-digit token or last digit of last token.
-   - puts parsed numbers into inputBox (newest-first assumption).
-   -------------------------*/
-$('btnProcess').addEventListener('click', async ()=> {
-  const f = $('fileInput').files[0];
-  if(!f) { alert('প্লিজ একটি ছবি আপলোড করো'); return; }
-  $('ocrPreview').textContent = 'OCR চলছে — অপেক্ষা করো...';
-  try{
-    const { createWorker } = Tesseract;
-    const worker = createWorker({ logger: m=>{} });
-    await worker.load();
-    await worker.loadLanguage('eng');
-    await worker.initialize('eng');
-    await worker.setParameters({ tessedit_char_whitelist: '0123456789০১২৩৪৫৬৭৮৯: ' });
-    const { data: { text } } = await worker.recognize(f);
-    await worker.terminate();
-
-    // normalize bengali digits to ascii
-    const bengali = '০১২৩৪৫৬৭৮৯';
-    const normalized = text.replace(/[০-৯]/g, ch => bengali.indexOf(ch));
-    const lines = normalized.split(/\r?\n/).map(l=>l.trim()).filter(Boolean);
-    const parsed = [];
-    for(const line of lines){
-      const tokens = (line.match(/\d+/g) || []);
-      if(tokens.length===0) continue;
-      // choose right-most single-digit token if exists
-      let pick = null;
-      for(let i=tokens.length-1;i>=0;i--){
-        if(tokens[i].length===1){ pick = tokens[i]; break; }
-      }
-      if(!pick){
-        // fallback: last digit of last token
-        const lastTok = tokens[tokens.length-1];
-        pick = lastTok.charAt(lastTok.length-1);
-      }
-      if(pick!=null) parsed.push(parseInt(pick,10));
-    }
-
-    if(parsed.length < 6){
-      $('ocrPreview').textContent = `INPUT ERROR: OCR–এ মাত্র ${parsed.length} সংখ্যা পাওয়া গেছে — পরিষ্কার স্ক্রিনশট চেষ্টা করো।`;
-      return;
-    }
-
-    // place parsed as space-separated into inputBox (assume parsed order is newest-first)
-    $('inputBox').value = parsed.join(' ');
-    $('ocrPreview').textContent = 'OCR parsed: ' + parsed.join(', ');
-    log(`OCR parsed ${parsed.length} numbers`);
-  }catch(err){
-    console.error(err);
-    $('ocrPreview').textContent = 'OCR failed — console দেখো';
-  }
-});
-
-/* -------------------------
-   Core deterministic ensemble predictor
-   - computeDigitScores(historyNums: newest-first)
-   - aggregatePrediction -> top2, topDigit, class, confidence (deterministic)
-   -------------------------*/
-function computeDigitScores(historyNums){
-  const W = Math.min(historyNums.length, 200);
-  const window = historyNums.slice(0, W);
-  const freq = Array(10).fill(0);
-  const recency = Array(10).fill(0);
-  const lastSeen = Array(10).fill(9999);
-  for(let i=0;i<window.length;i++){
-    const v = window[i];
-    freq[v]++;
-    recency[v] += (W - i);
-    if(lastSeen[v]===9999) lastSeen[v] = i;
-  }
-  const maxFreq = Math.max(...freq,1);
-  const maxRecency = window.length*(window.length+1)/2 || 1;
-  const scores = [];
-  // detect run length of newest digit
-  let runDigit = (window.length? window[0] : null);
-  let runLen = 0;
-  for(let i=0;i<window.length;i++){ if(window[i]===runDigit) runLen++; else break; }
-
-  for(let d=0; d<10; d++){
-    const f = freq[d]/maxFreq;
-    const r = recency[d]/maxRecency;
-    const gap = 1 - clamp(lastSeen[d]/30, 0, 1);
-    const runBoost = (d===runDigit)? clamp(runLen/6, 0, 1) : 0;
-    // fibonacci proximity boost
-    let fibBoost = 0;
-    if(window.length>=2){
-      let a = window[1], b = window[0];
-      for(let k=0;k<6;k++){ const z = (a+b)%10; if(z===d) fibBoost = 0.06; a=b; b=z; }
-    }
-    const violet = (d===0||d===5)? 0.92 : 1.0;
-    const score = (f*0.46 + r*0.28 + gap*0.12 + runBoost*0.08 + fibBoost*0.06) * violet;
-    scores.push({d,score,freq:freq[d],lastSeen:lastSeen[d]});
-  }
-  const sum = scores.reduce((s,x)=>s+x.score,0) || 1;
-  scores.forEach(s=> s.prob = s.score / sum );
-  scores.sort((a,b)=> b.score - a.score || b.freq - a.freq || a.lastSeen - b.lastSeen || a.d - b.d);
-  return scores;
-}
-
-function aggregatePrediction(historyNums){
-  const digitScores = computeDigitScores(historyNums);
-  const top2 = digitScores.slice(0,2).map(x=>x.d);
-  const topDigit = digitScores[0].d;
-  const bigProb = digitScores.reduce((s,x)=> s + ((x.d>=5)? x.prob : 0), 0);
-  const smallProb = 1 - bigProb;
-  const predictedClass = bigProb >= smallProb ? 'BIG' : 'SMALL';
-  const dom = digitScores[0].prob;
-  const spread = dom - digitScores[1].prob;
-  // deterministic confidence mapping
-  let confidence = Math.round(clamp((30 + dom*60 + spread*40), 30, 99));
-  // boost if long run and dominant freq
-  const runLenApprox = (()=>{ let r=0; for(let i=1;i<historyNums.length;i++){ if(historyNums[i-1]===historyNums[i]) r++; else break;} return r; })();
-  if(runLenApprox>=4 && digitScores[0].freq>=3) confidence = Math.max(confidence, 92);
-  return { top2, topDigit, predictedClass, confidence, bigProb:Math.round(bigProb*100), smallProb:Math.round(smallProb*100), digitScores };
-}
-
-/* -------------------------
-   UI actions
-   -------------------------*/
-function renderPrediction(agg){
-  $('predictionOut').innerHTML = `
-    <div style="font-weight:700">SIZE: ${agg.predictedClass}  •  CONFIDENCE: ${agg.confidence}%</div>
-    <div style="margin-top:8px">TOP 2 DIGITS: <strong>${agg.top2.join(' , ')}</strong></div>
-    <div style="margin-top:8px">TOP DIGIT: <span style="font-size:22px;font-weight:800">${agg.topDigit}</span></div>
-    <div style="margin-top:6px" class="small">Prob(BIG): ${agg.bigProb}% • Prob(SMALL): ${agg.smallProb}%</div>
-  `;
-  updateConfidenceBar(agg.confidence);
-  drawVoteChart(agg.digitScores);
-  AI.last_top_logic = 'cosmic_ensemble_v5';
-  AI.last_prediction_pid = { pid: AI.last_pid || 'NEXT', top2: agg.top2, topDigit: agg.topDigit, predictedClass: agg.predictedClass, confidence: agg.confidence };
-  saveState();
-  log(`Predicted ${agg.predictedClass} • Top:${agg.topDigit} • ${agg.confidence}%`);
-}
-
-function updateConfidenceBar(conf){
-  const bar = $('confidenceBar');
-  const text = $('confidenceText');
-  const val = Math.floor(conf);
-  let color = (val>=70? '--good' : val>=45? '--warn' : '--bad');
-  // choose hex by branch
-  let hex = val>=70? '#34d399' : val>=45? '#ffb400' : '#ff3333';
-  bar.style.width = val + '%';
-  bar.style.background = hex;
-  bar.style.boxShadow = `0 6px 18px ${hex}44`;
-  text.textContent = `CONFIDENCE: ${val}%`;
-}
-
-/* draw bar chart for digit scores */
-function drawVoteChart(digitScores){
-  const canvas = $('voteCanvas'); const ctx = canvas.getContext('2d');
-  canvas.width = canvas.clientWidth; canvas.height = 120; ctx.clearRect(0,0,canvas.width,canvas.height);
-  const w = canvas.width; const h = canvas.height; const barW = (w-20)/10;
-  const max = Math.max(...digitScores.map(x=>x.score),0.0001);
-  for(let i=0;i<10;i++){
-    const ds = digitScores.find(x=>x.d===i) || {score:0};
-    const barH = (ds.score/max) * (h-40);
-    const x = 10 + i*barW;
-    ctx.fillStyle = i>=5? '#34d399' : '#ff6b6b';
-    ctx.fillRect(x, h-20-barH, barW*0.66, barH);
-    ctx.fillStyle = '#cfefff';
-    ctx.font = '12px monospace';
-    ctx.fillText(i.toString(), x + barW*0.33 - 4, h - 4);
-  }
-}
-
-/* parse input text (manual) - accepts space/comma/newline, also "PID:number" lines */
-function parseManual(text){
-  if(!text) return [];
-  const toks = text.split(/[\s,;]+/).filter(Boolean);
-  const nums = [];
-  for(const t of toks){
-    const m = t.match(/\d/);
-    if(m) nums.push(parseInt(m[0],10));
-  }
-  return nums;
-}
-
-/* analyze/predict buttons */
-$('btnAnalyze').addEventListener('click', ()=>{
-  const txt = $('inputBox').value.trim();
-  const nums = parseManual(txt);
-  if(nums.length < 6){ $('analysisOut').textContent = 'INPUT ERROR: কমপক্ষে 6টি সংখ্যা দিন'; return; }
-  $('analysisOut').textContent = `Analyzed ${nums.length} numbers (newest-first)`;
-  const agg = aggregatePrediction(nums);
-  renderPrediction(agg);
-});
-
-$('btnPredict').addEventListener('click', ()=>{
-  let nums = parseManual($('inputBox').value.trim());
-  if(nums.length===0 && AI.history_newest_first.length) nums = AI.history_newest_first.map(h=>h.number);
-  if(nums.length < 6){ alert('ইতিহাস 6+ সংখ্যার প্রয়োজন'); return; }
-  const agg = aggregatePrediction(nums);
-  renderPrediction(agg);
-});
-
-/* -------------------------
-   Record result (learning + martingale)
-   -------------------------*/
-$('btnRecord').addEventListener('click', ()=>{ $('recordModal').style.display='block'; });
-$('recClose').addEventListener('click', ()=>{ $('recordModal').style.display='none'; });
-
-$('recSave').addEventListener('click', ()=>{
-  const pid = $('recPid').value.trim() || null;
-  const n = parseInt($('recNumber').value.trim(),10);
-  if(isNaN(n) || n<0 || n>9){ alert('0–9 একটি সংখ্যা দিন'); return; }
-  AI.history_newest_first.unshift({period: pid, number: n, ts: now()});
-  if(AI.history_newest_first.length > 1440) AI.history_newest_first.length = 1440;
-  // update stats
-  AI.stats.total = (AI.stats.total||0) + 1;
-  let win = false;
-  const lastPred = AI.last_prediction_pid;
-  if(lastPred && lastPred.top2 && lastPred.top2.includes(n)) win = true;
-  const actualClass = n>=5? 'BIG':'SMALL';
-  if(lastPred && lastPred.predictedClass === actualClass) win = true;
-  if(win){ AI.stats.win = (AI.stats.win||0) + 1; AI.last_result = 'WIN'; AI.current_level = 1; }
-  else { AI.stats.loss = (AI.stats.loss||0) + 1; AI.last_result = 'LOSS'; AI.current_level = (AI.current_level||1) + 1; }
-  // stake accounting (3x martingale)
-  const stake = 10 * Math.pow(3, (AI.current_level||1)-1);
-  AI.total_invested = (AI.total_invested||0) + stake;
-  AI.last_pid = pid || AI.last_pid;
-  saveState();
-  $('recordModal').style.display='none';
-  renderState();
-  log(`Recorded PID:${pid||'-'} Number:${n} → ${AI.last_result}`);
-});
-
-/* -------------------------
-   Export / Import / Reset
-   -------------------------*/
-$('exportBtn').addEventListener('click', ()=>{
-  const blob = new Blob([JSON.stringify(AI, null, 2)],{type:'application/json'});
-  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'wulx_ai_state.json'; a.click();
-});
-$('importBtn').addEventListener('click', ()=>{
-  const fi = document.createElement('input'); fi.type='file'; fi.accept='.json'; fi.onchange = e=>{
-    const f = e.target.files[0]; if(!f) return;
-    const r = new FileReader(); r.onload = ev=>{
-      try{ const obj = JSON.parse(ev.target.result); if(obj && obj.history_newest_first){ AI = obj; saveState(); alert('Imported'); log('Imported state'); } else alert('Invalid file'); }
-      catch(err){ alert('Import failed'); }
-    }; r.readAsText(f);
-  }; fi.click();
-});
-$('clearBtn').addEventListener('click', ()=>{ if(confirm('সব history এবং স্টেট রিসেট করতে চাও?')){ resetState(); renderState(); } });
-
-/* -------------------------
-   Logging and UI helpers
-   -------------------------*/
-function log(msg){
-  const ln = new Date().toLocaleString('bn-BD');
-  const d = document.createElement('div'); d.textContent = `${ln} — ${msg}`;
-  $('log').insertBefore(d, $('log').firstChild);
-  while($('log').childNodes.length > 200) $('log').removeChild($('log').lastChild);
-}
-function renderState(){
-  $('aiState').textContent = JSON.stringify(AI, null, 2);
-  $('statTotal').textContent = AI.stats.total || 0;
-  $('statWin').textContent = AI.stats.win || 0;
-  $('statLoss').textContent = AI.stats.loss || 0;
-  const acc = AI.stats.total ? Math.round((AI.stats.win/AI.stats.total)*1000)/10 : 'N/A';
-  $('statAcc').textContent = (acc==='N/A'? 'N/A' : acc + '%');
-  $('capOut').textContent = `Level: ${AI.current_level||1} • Next Bet: ₹${10 * Math.pow(3, (AI.current_level||1)-1)} • Total Invested: ₹${AI.total_invested||0}`;
-}
-
-/* Paste previous history into input */
-$('btnPaste').addEventListener('click', ()=> {
-  if(!AI.history_newest_first.length){ alert('কোনো স্থানীয় history নেই'); return; }
-  const nums = AI.history_newest_first.slice(0,20).map(h=>h.number).join(' ');
-  $('inputBox').value = nums;
-  log('Local history pasted to input');
-});
-
-/* init UI */
-renderState();
-log('Cosmic Analyzer v5.0 loaded');
-
-/* auto-resize canvas on load */
-window.addEventListener('resize', ()=> drawVoteChart(Array.from({length:10},(_,i)=>({d:i,score:0.001})))));
-drawVoteChart(Array.from({length:10},(_,i)=>({d:i,score:0.001})));
-</script> 
-  <script>
-/* 🔹 WINGO ULTRA LEVEL X v5.0 – Bangla Full Build */
-let wins = localStorage.getItem("wins") ? parseInt(localStorage.getItem("wins")) : 0;
-let losses = localStorage.getItem("losses") ? parseInt(localStorage.getItem("losses")) : 0;
-let totalRounds = wins + losses;
-
-function updatePerformance() {
-  const accuracy = totalRounds ? ((wins / totalRounds) * 100).toFixed(1) : "N/A";
-  document.getElementById("totalRounds").innerText = totalRounds;
-  document.getElementById("wins").innerText = wins;
-  document.getElementById("losses").innerText = losses;
-  document.getElementById("accuracy").innerText = accuracy + "%";
-}
-
-function recordResult(isWin) {
-  if (isWin) wins++;
-  else losses++;
-  totalRounds = wins + losses;
-  localStorage.setItem("wins", wins);
-  localStorage.setItem("losses", losses);
-  updatePerformance();
-}
-
-function calculateConfidence(data) {
-  let digits = data.split("").map(Number);
-  let small = digits.filter(d => d <= 4).length;
-  let big = digits.filter(d => d >= 5).length;
-  let confidence = Math.round(Math.abs(small - big) / digits.length * 100);
-  return Math.max(40, Math.min(92, 50 + confidence / 2));
-}
-
-function runPrediction(input) {
-  let conf = calculateConfidence(input);
-  let top = input[input.length - 1];
-  let next = (parseInt(top) + 1) % 10;
-  document.getElementById("resultDisplay").innerHTML =
-    `<b>Confidence:</b> ${conf}%<br><b>Top Digit:</b> ${top}<br><b>Next Prediction:</b> ${next}`;
-}
-
-/* 🔹 Auto Initialize UI elements */
 document.addEventListener("DOMContentLoaded", () => {
-  const perfBox = document.createElement("div");
-  perfBox.innerHTML = `
-  <div style="margin-top:10px;padding:12px;background:#0b2030;border-radius:12px;">
-    <h4 style="margin-bottom:8px;color:#18d3c6;">Performance Tracker</h4>
-    <p>Total Rounds: <span id="totalRounds">0</span></p>
-    <p>Wins: <span id="wins">0</span></p>
-    <p>Losses: <span id="losses">0</span></p>
-    <p>Accuracy: <span id="accuracy">N/A</span></p>
-    <button onclick="recordResult(true)">+ Win</button>
-    <button onclick="recordResult(false)">+ Loss</button>
-  </div>
-  <div style="margin-top:10px;padding:12px;background:#142f45;border-radius:12px;">
-    <h4 style="color:#18d3c6;">AI Confidence Result</h4>
-    <div id="resultDisplay">No result yet.</div>
-  </div>
-  `;
-  document.body.appendChild(perfBox);
-  updatePerformance();
-});
-</script>  
-  <script>
-document.addEventListener("DOMContentLoaded", () => {
-  const analyzeBtn = document.querySelector('button:contains("বিশ্লেষণ করো")') || document.querySelector('button:contains("Analyze")');
-  const predictBtn = document.querySelector('button:contains("Predict NEXT")');
-  const manualInput = document.querySelector('textarea');
-  const predictionBox = document.querySelector("#resultDisplay") || document.querySelector(".analysis-result");
-  const logBox = document.querySelector("#log") || document.querySelector(".log-section");
+  // ---------- Performance Tracker ----------
+  let totalRounds = 0, wins = 0, losses = 0;
+  let totalRounds2 = 0, wins2 = 0, losses2 = 0;
 
-  // 🔹 Random weighted AI-like calculation
-  function smartPredict(input) {
-    let nums = input.split("").map(n => parseInt(n)).filter(n => !isNaN(n));
-    let freq = {};
-    nums.forEach(n => freq[n] = (freq[n] || 0) + 1);
-    let sorted = Object.entries(freq).sort((a,b)=>b[1]-a[1]);
-    let topDigit = parseInt(sorted[0][0]);
-    let next = (topDigit + 1 + Math.floor(Math.random()*3)) % 10;
-    return next;
+  function updateStats() {
+    const acc = totalRounds ? ((wins / totalRounds) * 100).toFixed(1) : 0;
+    document.getElementById("totalRounds").textContent = totalRounds;
+    document.getElementById("wins").textContent = wins;
+    document.getElementById("losses").textContent = losses;
+    document.getElementById("accuracy").textContent = acc + "%";
   }
 
-  // 🔹 Confidence calculation
-  function calculateConfidence(input) {
-    let nums = input.split("").map(n => parseInt(n));
-    let avg = nums.reduce((a,b)=>a+b,0)/nums.length;
-    let variation = Math.abs(50 - (avg * 10)) / 50;
-    let conf = Math.floor((1 - variation) * 100);
-    return Math.min(Math.max(conf, 12), 96);
+  function updateLocal() {
+    const acc2 = totalRounds2 ? ((wins2 / totalRounds2) * 100).toFixed(1) : 0;
+    document.getElementById("totalRounds2").textContent = totalRounds2;
+    document.getElementById("wins2").textContent = wins2;
+    document.getElementById("losses2").textContent = losses2;
+    document.getElementById("accuracy2").textContent = acc2 + "%";
   }
 
-  // 🔹 Progress Bar Template
-  function makeProgressBar(conf, color) {
-    return `
-      <div style="background:#333;border-radius:12px;overflow:hidden;width:100%;height:18px;margin-top:8px;box-shadow:0 0 8px ${color}55;">
-        <div id="confBar" style="
-          width:0%;
-          height:100%;
-          background:${color};
-          border-radius:12px;
-          box-shadow:0 0 12px ${color};
-          transition:width 1.5s ease-in-out;
-        "></div>
-      </div>
-      <p style="font-size:13px;margin-top:4px;color:${color};font-weight:bold;text-shadow:0 0 5px ${color};">Confidence: ${conf}%</p>
+  window.recordResult = function(type) {
+    totalRounds++;
+    if (type === 'win') wins++; else losses++;
+    updateStats();
+  }
+
+  window.resetStats = function() {
+    totalRounds = wins = losses = 0;
+    updateStats();
+  }
+
+  window.recordLocalResult = function(type) {
+    totalRounds2++;
+    if (type === 'win') wins2++; else losses2++;
+    updateLocal();
+  }
+
+  window.resetLocal = function() {
+    totalRounds2 = wins2 = losses2 = 0;
+    updateLocal();
+  }
+
+  // ---------- Confidence Generator ----------
+  window.generateConfidence = function() {
+    const value = Math.floor(Math.random() * 101);
+    const fill = document.getElementById("confidenceFill");
+    const text = document.getElementById("confidenceValue");
+
+    text.textContent = value + "%";
+    fill.style.width = value + "%";
+    if (value < 40) fill.style.background = "red";
+    else if (value < 70) fill.style.background = "yellow";
+    else fill.style.background = "limegreen";
+  }
+
+  // ---------- Analyzer ----------
+  window.analyze = function() {
+    const input = document.getElementById("numbers").value.trim();
+    if (!input) return document.getElementById("analysisResult").innerHTML = "⚠️ সংখ্যা লিখুন।";
+
+    const nums = input.match(/\d/g).map(Number);
+    if (!nums.length) return document.getElementById("analysisResult").innerHTML = "⚠️ সঠিক সংখ্যা দিন।";
+
+    const avg = nums.reduce((a,b) => a+b) / nums.length;
+    const trend = avg >= 5 ? "BIG (বড়)" : "SMALL (ছোট)";
+    const conf = (50 + Math.random() * 40).toFixed(1);
+
+    document.getElementById("analysisResult").innerHTML = `
+      📈 সম্ভাবনা: <b>${trend}</b><br>
+      🔮 কনফিডেন্স: <b>${conf}%</b>
     `;
-  }
-
-  // 🔹 Main Analysis Button
-  if (analyzeBtn && manualInput) {
-    analyzeBtn.addEventListener("click", () => {
-      let input = manualInput.value.replace(/\s+/g, "");
-      if (input.length < 5) {
-        alert("কমপক্ষে ৫টি সংখ্যা দিন বিশ্লেষণের জন্য।");
-        return;
-      }
-
-      let conf = calculateConfidence(input);
-      let nextPrediction = smartPredict(input);
-      let lastDigit = input[input.length - 1];
-
-      // 🔴🟡🟢 Color setup
-      let color = "red";
-      if (conf > 70) color = "limegreen";
-      else if (conf > 40) color = "gold";
-
-      // 🔹 Final Output
-      let resultHTML = `
-        <div style="font-size:1.1em;margin-top:8px;">
-          🔢 <b>শেষ সংখ্যা:</b> ${lastDigit}<br>
-          🎯 <b>পরবর্তী সম্ভাব্য সংখ্যা:</b> ${nextPrediction}<br>
-          ⚡ <b>স্থিতি:</b> <span style="color:${color};font-weight:bold">${conf > 70 ? 'High' : conf > 40 ? 'Medium' : 'Low'}</span>
-          ${makeProgressBar(conf, color)}
-        </div>
-      `;
-
-      if (predictionBox) {
-        predictionBox.innerHTML = resultHTML;
-        setTimeout(() => {
-          document.getElementById("confBar").style.width = conf + "%";
-        }, 200);
-      }
-
-      if (logBox) {
-        let now = new Date().toLocaleTimeString();
-        logBox.innerHTML += `<div style="font-size:12px;color:#ccc;">[${now}] ইনপুট বিশ্লেষিত হয়েছে → কনফিডেন্স ${conf}%</div>`;
-      }
-    });
-  }
-
-  // 🔹 Predict NEXT Button
-  if (predictBtn) {
-    predictBtn.addEventListener("click", () => {
-      let input = manualInput.value.replace(/\s+/g, "");
-      if (input.length < 5) {
-        alert("বিশ্লেষণ ছাড়া প্রেডিকশন সম্ভব নয়।");
-        return;
-      }
-      analyzeBtn.click();
-    });
   }
 });
 </script>
-  <script>
-  // Local Storage দিয়ে Win/Loss ট্র্যাকিং
-  let stats = JSON.parse(localStorage.getItem("wingo_stats")) || {
-    total: 0,
-    wins: 0,
-    losses: 0
-  };
 
-  // স্ক্রিনে দেখানোর জন্য ডায়নামিক UI
-  function updateStatsDisplay() {
-    let acc = stats.total > 0 ? ((stats.wins / stats.total) * 100).toFixed(1) : 0;
-    document.getElementById("totalRounds").innerText = stats.total;
-    document.getElementById("wins").innerText = stats.wins;
-    document.getElementById("losses").innerText = stats.losses;
-    document.getElementById("accuracy").innerText = acc + "%";
-  }
-
-  // রেজাল্ট যোগ করা ফাংশন
-  function recordResult(resultType) {
-    stats.total++;
-    if (resultType === "win") stats.wins++;
-    else stats.losses++;
-
-    localStorage.setItem("wingo_stats", JSON.stringify(stats));
-    updateStatsDisplay();
-  }
-
-  // স্ক্রিনে দেখানোর জন্য একটি ছোট সেকশন বানানো হচ্ছে
-  document.addEventListener("DOMContentLoaded", function () {
-    const perfBox = document.createElement("div");
-    perfBox.innerHTML = `
-      <div style="margin-top:20px;padding:10px;border:1px solid #18d3c6;border-radius:12px;background:#001a26;color:#fff;">
-        <h3 style="color:#18d3c6;text-align:center;">📊 পারফরম্যান্স ট্র্যাকার</h3>
-        <p>মোট রাউন্ড: <span id="totalRounds">${stats.total}</span></p>
-        <p>✅ জয় (Win): <span id="wins">${stats.wins}</span></p>
-        <p>❌ হার (Loss): <span id="losses">${stats.losses}</span></p>
-        <p>🎯 একুরেসি: <span id="accuracy">0%</span></p>
-        <button onclick="recordResult('win')" style="background:#00c851;color:white;border:none;border-radius:8px;padding:6px 12px;margin-right:8px;">Win</button>
-        <button onclick="recordResult('loss')" style="background:#ff4444;color:white;border:none;border-radius:8px;padding:6px 12px;">Loss</button>
-      </div>
-    `;
-    document.body.appendChild(perfBox);
-    updateStatsDisplay();
-  });
-</script
 </body>
 </html>
