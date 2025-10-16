@@ -1,11 +1,626 @@
-<!DOCTYPE html>
-<html>
+<!doctype html>
+<html lang="bn">
 <head>
-  <meta charset="UTF-8" />
-  <title>Wingo Analyzer Ultra Pro</title>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Hybrid Ultra AI vX — Wingo Analyzer (Final Hybrid)</title>
+<style>
+:root{
+  --bg:#071022; --card:#0b1622; --muted:#9fb7d6; --accent:#22d3ee; --good:#34d399; --bad:#fb7185;
+  --glass: rgba(255,255,255,0.03);
+}
+html,body{height:100%;margin:0;font-family: "Noto Sans", "Noto Sans Bengali", system-ui; background:var(--bg); color:#e6f6ff}
+.container{max-width:1000px;margin:16px auto;padding:14px}
+.header{display:flex;align-items:center;justify-content:space-between;gap:12px}
+h1{margin:0;color:var(--accent);font-size:20px}
+.card{background:var(--card);border-radius:12px;padding:12px;margin-top:12px;box-shadow:0 8px 30px rgba(0,0,0,0.6)}
+.label{color:var(--muted);font-size:13px}
+textarea,input,select{width:100%;box-sizing:border-box;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.03);background:transparent;color:inherit}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.btn{background:var(--accent);color:#021024;padding:9px 12px;border-radius:8px;border:none;cursor:pointer;font-weight:700}
+.btn.ghost{background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--muted)}
+.small{color:var(--muted);font-size:13px}
+.out{background:var(--glass);padding:10px;border-radius:8px;margin-top:10px}
+.ai-state{background:#021526;padding:10px;border-radius:8px;color:#cfefff;white-space:pre-wrap;max-height:240px;overflow:auto;font-family:monospace}
+.grid{display:grid;grid-template-columns:1fr 380px;gap:12px}
+@media(max-width:900px){.grid{grid-template-columns:1fr}}
+canvas{width:100%;height:140px;background:transparent;border-radius:6px}
+.stat{display:flex;justify-content:space-between;padding:8px;border-radius:6px;background:rgba(255,255,255,0.02);margin-top:8px}
+.kv{font-family:monospace}
+</style>
 </head>
-<body style="font-family: Arial; text-align: center; margin-top: 50px;">
-  <h1>✅ Wingo Analyzer is Live!</h1>
-  <p>This is your AI predictor system. Future predictions will appear here.</p>
+<body>
+<div class="container">
+  <div class="header">
+    <div>
+      <h1>Hybrid Ultra AI vX — Wingo Analyzer (Final Hybrid)</h1>
+      <div class="small">Deterministic ensemble · Offline learning · Top-2 digits · Martingale · Mobile friendly</div>
+    </div>
+    <div class="small kv" id="version">vX • final</div>
+  </div>
+
+  <div class="card">
+    <div class="label">Input — শেষ ফলাফল (newest-first preferred). গ্রহণযোগ্য: "period:number" per line, অথবা শুধু সংখ্যাগুলো কমা/স্পেস/নিউলাইন দিয়ে।</div>
+    <textarea id="inputBox" rows="4" placeholder="উদাহরণ (newest-first): 20251015100011411:6 20251015100011410:1 8 2 5 5 3  ..."></textarea>
+    <div class="row">
+      <button class="btn" id="analyzeBtn">🔎 Analyze</button>
+      <button class="btn" id="predictBtn">🟧 Predict NEXT</button>
+      <button class="btn ghost" id="recordOpen">📝 Record Result</button>
+      <button class="btn ghost" id="exportBtn">📤 Export</button>
+      <button class="btn ghost" id="importBtn">📥 Import</button>
+    </div>
+    <div class="small" style="margin-top:8px">MIN history for analysis = 6. Engine window = min(history,200). Base stake ₹10, Martingale ×3.</div>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <div style="font-weight:700">Summary</div>
+      <div id="summaryBox" class="out">No analysis yet.</div>
+
+      <div style="margin-top:8px;font-weight:700">Method Signals (top contributors)</div>
+      <pre id="methodSignals" class="out small" style="max-height:160px;overflow:auto"></pre>
+
+      <div style="margin-top:8px">
+        <div class="stat"><div>BIG (5–9)</div><div id="bigCnt">-</div></div>
+        <div class="stat"><div>SMALL (0–4)</div><div id="smallCnt">-</div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div style="font-weight:700">Prediction Output</div>
+      <div id="predictionOut" class="out">No prediction yet.</div>
+      <canvas id="voteCanvas"></canvas>
+      <div style="margin-top:8px;font-weight:700">AI_MEMORY_STATE</div>
+      <div id="aiState" class="ai-state"></div>
+      <div style="margin-top:8px" class="small">Copy this state for backup. All stored locally.</div>
+    </div>
+  </div>
+
+  <div class="card" id="recordCard" style="display:none">
+    <div style="font-weight:700">Record Result (Learning)</div>
+    <div class="small">PID (optional) এবং Actual Number দিন — মডেল লোকালি শিখবে ও মার্টিনগেল আপডেট করবে।</div>
+    <div style="margin-top:8px">
+      <input id="recPid" placeholder="Period (optional)"/>
+      <div style="height:8px"></div>
+      <input id="recNum" placeholder="Number (0-9)"/>
+      <div style="height:8px"></div>
+      <div class="row">
+        <button class="btn" id="recSubmit">Confirm & Learn</button>
+        <button class="btn ghost" id="recCancel">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div style="font-weight:700">History (newest-first)</div>
+    <div id="historyBox" class="small out" style="max-height:160px;overflow:auto">No history saved.</div>
+    <div style="margin-top:8px" class="row">
+      <button class="btn ghost" id="clearHistory">Clear History</button>
+      <button class="btn ghost" id="top2Btn">Show Top-2</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+/* Hybrid Ultra AI vX — single-file engine
+   Deterministic. No randomness. LocalStorage persistence.
+*/
+
+/* --------------- Utilities --------------- */
+const $ = id => document.getElementById(id);
+const clamp = (v,a,b) => Math.max(a,Math.min(b,v));
+const now = ()=> Date.now();
+
+/* --------------- Storage & Memory --------------- */
+const STORAGE_KEY = 'HYBRID_ULTRA_AI_VX';
+function defaultState(){
+  return {
+    meta: { version:'vX', created: now() },
+    history_newest_first: [], // {period?, number, ts}
+    methods: {}, // methodName -> {correct:0,attempts:0,weight:1.0}
+    current_level: 1,
+    total_invested: 0,
+    last_top_logic: null,
+    last_result: 'N/A',
+    last_prediction_pid: null
+  };
+}
+let STATE = (function(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(raw) return JSON.parse(raw);
+  } catch(e){}
+  const s = defaultState();
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(s));
+  return s;
+})();
+function saveState(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(STATE)); renderState(); }
+function renderState(){ $('aiState').textContent = JSON.stringify(STATE, null, 2); }
+
+/* --------------- Parsing Input --------------- */
+// Accepts period:number lines or plain digits. Returns {numbers:newest-first array, lastPeriod}
+function parseInputText(text){
+  if(!text) return {numbers:[], lastPeriod:null};
+  // Normalize different separators to newline
+  const lines = text.replace(/\r/g,'\n').split('\n').map(s=>s.trim()).filter(Boolean);
+  const numbers=[];
+  let lastPeriod=null;
+  // If many tokens in single line, split by spaces/commas too
+  for(const line of lines){
+    // If line contains colon and a long left side -> treat as period:number
+    if(/[:]/.test(line)){
+      const parts = line.split(/[:\-]/).map(s=>s.trim()).filter(Boolean);
+      // try to find last numeric single digit token for number
+      const numToken = parts[parts.length-1].match(/[0-9]$/);
+      if(numToken){
+        const n = parseInt(numToken[0],10);
+        if(!isNaN(n)) numbers.push(n);
+      } else {
+        // fallback: scan digits in line
+        for(const ch of line) if(/[0-9]/.test(ch)) { numbers.push(parseInt(ch,10)); break; }
+      }
+      // also pick period if left side looks like many digits
+      const left = parts[0];
+      if(left && left.length>4 && /^\d+$/.test(left)) lastPeriod = left;
+    } else {
+      // split tokens by spaces/commas/dots
+      const tokens = line.split(/[\s,.;]+/).filter(Boolean);
+      for(const t of tokens){
+        // if token is exactly one digit, use it; if longer, break into digits
+        if(/^[0-9]$/.test(t)) numbers.push(parseInt(t,10));
+        else {
+          for(const ch of t) if(/[0-9]/.test(ch)) { numbers.push(parseInt(ch,10)); break; }
+        }
+      }
+    }
+  }
+  // keep newest-first as given; if user provided oldest-first, they can reverse input manually
+  return {numbers, lastPeriod};
+}
+
+/* --------------- History Helpers --------------- */
+const MAX_HISTORY = 1440;
+function pushHistoryEntry(period, number){
+  STATE.history_newest_first.unshift({period: period || null, number: number, ts: now()});
+  if(STATE.history_newest_first.length > MAX_HISTORY) STATE.history_newest_first.length = MAX_HISTORY;
+  saveState();
+  renderHistory();
+}
+
+/* --------------- Methods (deterministic ensemble) --------------- */
+/* Each method returns {class: 'BIG'|'SMALL' or null, conf: 0..1, reason: string} */
+function ensureMethodStats(methodName){
+  if(!STATE.methods[methodName]) STATE.methods[methodName] = {correct:0, attempts:0, weight:1.0};
+}
+function m_dragon_continuation(historyNums){
+  // if same class for >=3 -> continuation
+  const cls = historyNums[0] >=5 ? 'BIG' : 'SMALL';
+  let run=1;
+  for(let i=1;i<historyNums.length;i++){ if((historyNums[i]>=5? 'BIG':'SMALL')===cls) run++; else break; }
+  if(run>=3) return {class:cls, conf:0.72, reason:`dragon(${run})`};
+  return {class:null, conf:0, reason:'no'};
+}
+function m_streak_break_4plus(historyNums){
+  const cls = historyNums[0] >=5 ? 'BIG' : 'SMALL';
+  let run=1;
+  for(let i=1;i<historyNums.length;i++){ if((historyNums[i]>=5? 'BIG':'SMALL')===cls) run++; else break; }
+  if(run>=4) return {class: cls==='BIG' ? 'SMALL' : 'BIG', conf:0.78, reason:`streak_break(${run})`};
+  return {class:null, conf:0, reason:'no'};
+}
+function m_hot_digit_follow(historyNums){
+  const w = historyNums.slice(0,20);
+  const freq = Array(10).fill(0);
+  for(const v of w) freq[v]++;
+  let top=0,topc=0;
+  for(let d=0;d<10;d++){ if(freq[d]>topc){ top=d; topc=freq[d]; } }
+  if(topc>=3) return {class: top>=5? 'BIG':'SMALL', conf: 0.5 + clamp((topc-3)*0.06,0,0.25), reason:`hot${top}`};
+  return {class:null, conf:0, reason:'no'};
+}
+function m_cold_digit_rebound(historyNums){
+  const w = historyNums.slice(0,12);
+  const seen = new Set(w);
+  for(let d=0; d<=9; d++){
+    if(!seen.has(d)) return {class: d>=5? 'BIG':'SMALL', conf:0.32, reason:`cold${d}`};
+  }
+  return {class:null, conf:0, reason:'no'};
+}
+function m_recency_gap_trigger(historyNums){
+  if(historyNums.length<2) return {class:null, conf:0, reason:'na'};
+  const last = historyNums[0];
+  for(let i=1;i<Math.min(historyNums.length,18);i++){
+    if(historyNums[i]===last) return {class: last>=5? 'BIG':'SMALL', conf:0.42, reason:`rec_gap(${i})`};
+  }
+  return {class:null, conf:0, reason:'no'};
+}
+function m_fibonacci_mod10(historyNums){
+  if(historyNums.length<2) return {class:null, conf:0, reason:'na'};
+  const a = historyNums[0], b = historyNums[1];
+  const pred = (a + b) % 10;
+  return {class: pred>=5? 'BIG':'SMALL', conf:0.34, reason:`fib${pred}`};
+}
+function m_parity_run_reversal(historyNums){
+  if(historyNums.length<3) return {class:null, conf:0, reason:'na'};
+  const p = historyNums.slice(0,3).map(x=>x%2);
+  if(p[0]===p[1] && p[1]===p[2]) return {class: (1-p[0])? 'BIG':'SMALL', conf:0.36, reason:'parity_rev'};
+  return {class:null, conf:0, reason:'no'};
+}
+function m_pair_echo(historyNums){
+  if(historyNums.length<2) return {class:null, conf:0, reason:'na'};
+  if(historyNums[0]===historyNums[1]) return {class: historyNums[0]>=5? 'BIG':'SMALL', conf:0.44, reason:'pair_echo'};
+  return {class:null, conf:0, reason:'no'};
+}
+function m_triple_sequence_follow(historyNums){
+  if(historyNums.length<3) return {class:null, conf:0, reason:'na'};
+  if(historyNums[0]===historyNums[1] && historyNums[1]===historyNums[2]) return {class: historyNums[0]>=5? 'BIG':'SMALL', conf:0.60, reason:'triple'};
+  return {class:null, conf:0, reason:'no'};
+}
+function m_size_balance_correction(historyNums){
+  const w = historyNums.slice(0,30);
+  let big=0;
+  for(const v of w) if(v>=5) big++;
+  if(big/w.length > 0.65) return {class:'SMALL', conf:0.33, reason:'bal_high_big'};
+  if(big/w.length < 0.35) return {class:'BIG', conf:0.33, reason:'bal_low_big'};
+  return {class:null, conf:0, reason:'no'};
+}
+function m_fallback_gentle(historyNums){
+  const w = historyNums.slice(0,20);
+  if(w.length===0) return {class:null, conf:0, reason:'na'};
+  let big=0; for(const v of w) if(v>=5) big++;
+  return {class: big >= w.length/2 ? 'BIG' : 'SMALL', conf:0.30, reason:'fallback'};
+}
+
+/* list in deterministic order */
+const METHODS = [
+  m_dragon_continuation, m_streak_break_4plus, m_hot_digit_follow, m_cold_digit_rebound,
+  m_recency_gap_trigger, m_fibonacci_mod10, m_parity_run_reversal, m_pair_echo,
+  m_triple_sequence_follow, m_size_balance_correction, m_fallback_gentle
+];
+
+/* --------------- Aggregation & Confidence --------------- */
+const METHOD_CONF_MIN = 0.30, METHOD_CONF_MAX = 0.85;
+
+function aggregateEnsemble(historyNums){
+  // historyNums newest-first values (numbers)
+  // run each method, compute effective conf = clamp(conf, MIN, MAX) * methodWeight
+  const votes = {BIG:0, SMALL:0};
+  const contributors = [];
+  for(const fn of METHODS){
+    try{
+      const out = fn(historyNums);
+      if(out && out.class){
+        // ensure method stats slot
+        ensureMethodStats(fn.name);
+        const stats = STATE.methods[fn.name];
+        // methodWeight derived from stats.weight (initial 1.0) and success ratio
+        const skillRatio = (stats.attempts>0) ? stats.correct / stats.attempts : 0.5; // 0..1
+        // deterministic mapping: more correct -> weight up to 1.35, else down to 0.7
+        const weight = 0.7 + skillRatio * 0.65;
+        const eff_conf = clamp(out.conf, METHOD_CONF_MIN, METHOD_CONF_MAX) * weight;
+        votes[out.class] += eff_conf;
+        contributors.push({method: fn.name, cls: out.class, eff_conf: eff_conf, reason: out.reason});
+      }
+    } catch(e){
+      // ignore
+    }
+  }
+  // violet proximity damp if last digit is 0 or 5 (reduce votes slightly)
+  const last = historyNums[0];
+  if(last===0 || last===5){
+    votes.BIG *= 0.92; votes.SMALL *= 0.92;
+  }
+  // diversity factor
+  const distinctMethodCount = contributors.length;
+  const diversityFactor = distinctMethodCount >= 4 ? 1.06 : 0.94;
+  votes.BIG *= diversityFactor; votes.SMALL *= diversityFactor;
+
+  const total = votes.BIG + votes.SMALL;
+  let predicted = 'SMALL';
+  let conf = 35;
+  if(total>0){
+    predicted = votes.BIG > votes.SMALL ? 'BIG' : 'SMALL';
+    const dom = Math.max(votes.BIG, votes.SMALL);
+    // raw confidence ratio mapping
+    const raw = clamp(((dom / Math.max(1,total)) * 0.72) + ((distinctMethodCount / METHODS.length) * 0.28), 0.30, 0.99);
+    conf = Math.round(30 + raw * 69);
+    // uplift to 100 if many high-conf methods agree
+    const highAgree = contributors.filter(c=>c.eff_conf >= 0.7 && c.cls === predicted).length;
+    if(highAgree >= 5) conf = 100;
+  } else {
+    predicted = 'SMALL'; conf = 35;
+  }
+
+  // top2 digit selection (digit-level deterministic scoring)
+  const digitScores = computeDigitScores(historyNums);
+  digitScores.sort((a,b)=>{
+    if(b.score!==a.score) return b.score-a.score;
+    if(b.freq!==a.freq) return b.freq-a.freq;
+    if(a.lastSeen!==b.lastSeen) return a.lastSeen - b.lastSeen;
+    return a.d - b.d;
+  });
+  const top2 = digitScores.slice(0,2).map(x=>x.d);
+
+  return {predicted, confidence: conf, contributors, votes, top2, digitScores};
+}
+
+/* --------------- Digit scoring (hybrid of freq/recency/gap/fib/run) --------------- */
+function computeDigitScores(historyNums){
+  const window = historyNums.slice(0,200);
+  const freq = Array(10).fill(0);
+  const recency = Array(10).fill(0);
+  const lastSeen = Array(10).fill(9999);
+  for(let i=0;i<window.length;i++){
+    const v = window[i];
+    freq[v]++;
+    recency[v] += (window.length - i); // more recent gets higher
+    if(lastSeen[v]===9999) lastSeen[v] = i;
+  }
+  // fibonacci candidates
+  const fibCandidates = (() => {
+    if(window.length<2) return [];
+    const a = window[1], b = window[0];
+    const out = [];
+    let x=a,y=b;
+    for(let i=0;i<6;i++){ const z=(x+y)%10; out.push(z); x=y; y=z; }
+    return out;
+  })();
+
+  // scoring deterministic weights
+  const w_freq = 0.46, w_recency = 0.28, w_gap = 0.12, w_run = 0.08, w_fib = 0.06;
+  const scores = [];
+  // compute run influence
+  const runDigit = window[0];
+  let runLen = 1;
+  for(let i=1;i<window.length;i++){ if(window[i]===runDigit) runLen++; else break; }
+  for(let d=0; d<10; d++){
+    const freqNorm = freq[d] / Math.max(1, window.length); // 0..1
+    const recNorm = recency[d] / Math.max(1, (window.length*(window.length+1)/2)); // small
+    const gapNorm = 1 - (Math.min(lastSeen[d], 30) / 30); // 0..1 (closer seen => higher)
+    const runBoost = (d===runDigit) ? clamp(runLen/6, 0, 1) : 0;
+    const fibBoost = fibCandidates.includes(d) ? 0.06 : 0;
+    let score = freqNorm * w_freq + recNorm * w_recency + gapNorm * w_gap + runBoost * w_run + fibBoost * w_fib;
+    // damp 0 and 5 slightly to avoid violet over-weight
+    if(d===0 || d===5) score *= 0.9;
+    scores.push({d, score, freq: freq[d], lastSeen: lastSeen[d]});
+  }
+  return scores;
+}
+
+/* --------------- Martingale helpers --------------- */
+const BASE_STAKE = 10;
+function currentStake(){
+  const level = STATE.current_level || 1;
+  return BASE_STAKE * Math.pow(3, level-1);
+}
+function recordInvestment(amount){
+  STATE.total_invested = (STATE.total_invested || 0) + amount;
+  saveState();
+}
+
+/* --------------- Learning rule (deterministic EMA-ish) --------------- */
+function learnFromResult(pid, actualNumber, predictedObj){
+  // Append to history
+  pushHistoryEntry(pid, actualNumber);
+  // Determine actual class
+  const actualClass = actualNumber >=5 ? 'BIG' : 'SMALL';
+  // Update method stats: for each method, check its output on snapshot before this result
+  // Use snapshot = history excluding the new appended element
+  const snapshot = STATE.history_newest_first.slice(1).map(h=>h.number);
+  for(const fn of METHODS){
+    ensureMethodStats(fn.name);
+    const out = fn(snapshot);
+    if(out && out.class){
+      const stats = STATE.methods[fn.name];
+      stats.attempts = (stats.attempts||0) + 1;
+      // deterministic success check
+      if(out.class === actualClass) stats.correct = (stats.correct||0) + 1;
+      // update method weight by EMA-like deterministic rule
+      const accRate = 0.06; // learning rate
+      const perf = (stats.attempts>0) ? (stats.correct / stats.attempts) : 0.5;
+      // map perf to weight between 0.7 and 1.35
+      const newWeight = 0.7 + perf * 0.65;
+      stats.weight = newWeight;
+      // small penalty if method predicted with high conf and was wrong
+      if(out.conf >= 0.7 && out.class !== actualClass) {
+        stats.weight = clamp(stats.weight - 0.08, 0.5, 1.5);
+      }
+    }
+  }
+  // martingale update
+  // if we had a previous last_prediction_pid that matches pid, treat result WIN/LOSS
+  if(STATE.last_prediction_pid && pid && STATE.last_prediction_pid === pid){
+    // if predictedObj exists, use predictedObj.predicted vs actualClass
+    const predictedClass = predictedObj ? predictedObj.predicted : null;
+    if(predictedClass && predictedClass === actualClass){
+      // WIN: reset
+      STATE.last_result = 'WIN';
+      STATE.current_level = 1;
+    } else {
+      STATE.last_result = 'LOSS';
+      STATE.current_level = (STATE.current_level || 1) + 1;
+    }
+  } else {
+    // if no matching pid, set last_result to N/A
+    STATE.last_result = 'N/A';
+  }
+  // update invested
+  recordInvestment(currentStake());
+  saveState();
+}
+
+/* --------------- UI Rendering --------------- */
+function renderHistory(){
+  const box = $('historyBox');
+  if(!STATE.history_newest_first.length){ box.textContent = 'No history saved.'; drawVotes([]); return; }
+  box.innerHTML = STATE.history_newest_first.slice(0,200).map((h, idx) => {
+    const n = h.number; const p = h.period? ` (${h.period})` : '';
+    return `${idx+1}. ${n}${p} — ${new Date(h.ts).toLocaleString()}`;
+  }).join('\n');
+  drawVotes(STATE.history_newest_first.map(h=>h.number));
+}
+function renderMethods(contributors){
+  const el = $('methodSignals');
+  if(!contributors || !contributors.length){ el.textContent = 'No signals.'; return; }
+  const lines = contributors.slice(0,30).map(c=>`${c.method} → ${c.cls} @ ${(c.eff_conf*100|0)}%   (${c.reason})`);
+  el.textContent = lines.join('\n');
+}
+function renderPrediction(pred){
+  const out = $('predictionOut');
+  const voteText = `SIZE: ${pred.predicted}  • Confidence: ${pred.confidence}%`;
+  const top2 = pred.top2.join(', ');
+  const dom = pred.contributors.length ? pred.contributors[0].method : 'n/a';
+  out.innerHTML = `<div style="font-weight:700">${voteText}</div>
+                   <div style="margin-top:6px">Top-2 digits: <strong>${top2}</strong></div>
+                   <div style="margin-top:6px">Dominant Logic: <strong>${dom}</strong></div>
+                   <div style="margin-top:6px">Invest Level: <strong>Level ${STATE.current_level || 1}</strong> • Next Bet: ₹${currentStake()}</div>`;
+  renderMethods(pred.contributors);
+}
+function drawVotes(digits){
+  const canvas = $('voteCanvas');
+  const ctx = canvas.getContext('2d');
+  // clear
+  canvas.width = canvas.clientWidth;
+  canvas.height = 140;
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  // if no digits, helper message
+  if(!digits || !digits.length){
+    ctx.fillStyle = 'rgba(255,255,255,0.03)';
+    ctx.font = '12px sans-serif';
+    ctx.fillText('No history to visualize', 10, 20);
+    return;
+  }
+  // compute counts for 0..9
+  const counts = Array(10).fill(0);
+  for(const d of digits) counts[d]++;
+  const maxc = Math.max(...counts);
+  const w = canvas.clientWidth, h=canvas.clientHeight;
+  const barW = (w - 20) / 10;
+  for(let d=0; d<10; d++){
+    const x = 10 + d*barW;
+    const barH = maxc ? (counts[d] / maxc) * (h - 40) : 0;
+    ctx.fillStyle = (d>=5? '#34d399' : '#fb7185');
+    ctx.fillRect(x, h - 20 - barH, barW - 6, barH);
+    ctx.fillStyle = '#cfefff';
+    ctx.font = '12px monospace';
+    ctx.fillText(d.toString(), x+4, h - 4);
+  }
+}
+
+/* --------------- Events --------------- */
+$('analyzeBtn').addEventListener('click', ()=>{
+  const txt = $('inputBox').value.trim();
+  const parsed = parseInputText(txt);
+  const nums = parsed.numbers;
+  const lastPid = parsed.lastPeriod;
+  if(nums.length < 6){ $('summaryBox').textContent = 'INPUT ERROR: Please provide at least 6 numbers for reliable analysis.'; return; }
+  // use newest-first as provided
+  const historyNums = nums.slice(0, Math.min(nums.length, 200));
+  const agg = aggregateEnsemble(historyNums);
+  // display counts
+  const bigCount = historyNums.filter(n=>n>=5).length, smallCount = historyNums.length - bigCount;
+  $('bigCnt').textContent = bigCount;
+  $('smallCnt').textContent = smallCount;
+  // render summary
+  $('summaryBox').innerHTML = `Analyzed: ${historyNums.length} | Distinct: ${new Set(historyNums).size} | Last run: ${historyNums.slice(0,10).join(', ')}`;
+  renderPrediction(agg);
+  // set last_prediction_pid inferred (if possible)
+  if(lastPid) {
+    try{
+      const nextPid = (BigInt(lastPid) + 1n).toString();
+      STATE.last_prediction_pid = nextPid;
+    } catch(e){
+      STATE.last_prediction_pid = null;
+    }
+  }
+  STATE.last_top_logic = agg.contributors.length ? agg.contributors[0].method : STATE.last_top_logic;
+  saveState();
+});
+
+$('predictBtn').addEventListener('click', ()=>{
+  // Use stored local history if input empty
+  const txt = $('inputBox').value.trim();
+  const parsed = parseInputText(txt);
+  let nums = parsed.numbers;
+  if(!nums.length && STATE.history_newest_first.length){
+    nums = STATE.history_newest_first.map(h=>h.number);
+  }
+  if(nums.length < 6){ alert('কমপক্ষে 6টি সংখ্যা দিন prediction-এর জন্য (input বা local history থেকে)।'); return; }
+  const agg = aggregateEnsemble(nums.slice(0,200));
+  // set memory fields
+  STATE.last_prediction_pid = parsed.lastPeriod || STATE.last_prediction_pid;
+  STATE.last_top_logic = agg.contributors.length ? agg.contributors[0].method : STATE.last_top_logic;
+  saveState();
+  renderPrediction(agg);
+});
+
+/* Record result UI */
+$('recordOpen').addEventListener('click', ()=>{ $('recordCard').style.display='block'; });
+$('recCancel').addEventListener('click', ()=>{ $('recordCard').style.display='none'; });
+
+$('recSubmit').addEventListener('click', ()=>{
+  const pid = $('recPid').value.trim() || null;
+  const nRaw = $('recNum').value.trim();
+  const n = parseInt(nRaw,10);
+  if(isNaN(n) || n<0 || n>9){ alert('Enter a valid number (0-9)'); return; }
+  // predictedObj: reconstruct last prediction if present
+  const inputTxt = $('inputBox').value.trim();
+  const parsedIn = parseInputText(inputTxt);
+  let nums = parsedIn.numbers;
+  if(!nums.length && STATE.history_newest_first.length) nums = STATE.history_newest_first.map(h=>h.number);
+  const predictedObj = nums.length>=6 ? aggregateEnsemble(nums.slice(0,200)) : null;
+  learnFromResult(pid, n, predictedObj);
+  $('recordCard').style.display='none';
+  alert(JSON.stringify({status:'learned', pid: pid, number: n, new_state: STATE}, null, 2));
+  renderHistory();
+});
+
+/* export/import */
+$('exportBtn').addEventListener('click', ()=>{
+  const payload = JSON.stringify(STATE, null, 2);
+  const blob = new Blob([payload], {type:'application/json'});
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'hybrid_ultra_ai_vx_state.json'; document.body.appendChild(a); a.click(); a.remove();
+});
+$('importBtn').addEventListener('click', ()=>{
+  const fi = document.createElement('input'); fi.type='file'; fi.accept='.json';
+  fi.onchange = e => {
+    const f = e.target.files[0]; if(!f) return;
+    const r = new FileReader();
+    r.onload = ev => {
+      try{
+        const obj = JSON.parse(ev.target.result);
+        if(obj && obj.history_newest_first){
+          STATE = obj;
+          saveState();
+          alert('State imported.');
+          renderHistory();
+        } else alert('Invalid file.');
+      }catch(err){ alert('Import error: ' + err); }
+    };
+    r.readAsText(f);
+  };
+  fi.click();
+});
+
+$('clearHistory').addEventListener('click', ()=>{
+  if(!confirm('Clear local history and reset state?')) return;
+  STATE = defaultState();
+  saveState(); renderHistory();
+});
+
+$('top2Btn').addEventListener('click', ()=>{
+  const nums = STATE.history_newest_first.map(h=>h.number);
+  if(nums.length<6) return alert('History too small for top2. Add more.');
+  const agg = aggregateEnsemble(nums);
+  alert('Top-2 digits: ' + agg.top2.join(', ') + '   Confidence: ' + agg.confidence + '%');
+});
+
+/* init render */
+renderState();
+renderHistory();
+
+/* Make deterministic: avoid any use of Math.random in engine — none used */
+/* Done */
+
+</script>
 </body>
 </html>
