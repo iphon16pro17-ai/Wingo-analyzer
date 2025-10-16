@@ -3,470 +3,459 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Hybrid Ultra AI vX — OCR Integrated (Dark)</title>
+<title>WINGO ULTRA LEVEL X v3.6 — Bangla Number Prediction Mode</title>
 
-<!-- Tesseract.js CDN -->
+<!-- Tesseract.js (client-side OCR) -->
 <script src="https://unpkg.com/tesseract.js@2.1.5/dist/tesseract.min.js"></script>
 
 <style>
-  :root{
-    --bg:#041022; --panel:#071726; --card:#0b2030; --muted:#9fb7d6; --accent:#22d3ee;
-    --good:#34d399; --bad:#fb7185; --glass: rgba(255,255,255,0.03);
-  }
-  html,body{height:100%;margin:0;font-family: "Noto Sans Bengali", "Inter", system-ui; background:var(--bg); color:#e6f6ff;}
-  .wrap{max-width:980px;margin:14px auto;padding:14px;}
-  header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:8px}
-  h1{margin:0;font-size:18px;color:var(--accent)}
-  .sub{color:var(--muted);font-size:13px}
-  .grid{display:grid;grid-template-columns:1fr 420px;gap:12px}
-  @media(max-width:940px){ .grid{grid-template-columns:1fr} }
-  .card{background:var(--card);border-radius:10px;padding:12px;border:1px solid rgba(255,255,255,0.02)}
-  textarea,input{width:100%;box-sizing:border-box;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.03);background:transparent;color:inherit}
-  .row{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
-  button{padding:9px 12px;border-radius:8px;border:none;cursor:pointer;font-weight:700;background:var(--accent);color:#021024}
-  button.ghost{background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--muted)}
-  .small{font-size:13px;color:var(--muted)}
-  .out{background:var(--glass);padding:10px;border-radius:8px;margin-top:8px;white-space:pre-wrap}
-  .ai-state{background:#021526;padding:10px;border-radius:8px;color:#cfefff;white-space:pre-wrap;max-height:260px;overflow:auto;font-family:monospace}
-  canvas{width:100%;height:140px;background:transparent;border-radius:6px;margin-top:8px}
-  .stat{display:flex;justify-content:space-between;padding:8px;border-radius:6px;background:rgba(255,255,255,0.02);margin-top:8px}
-  .hint{color:#bfe7ff;font-size:13px;margin-top:6px}
+:root{
+  --bg:#071022; --panel:#0b2030; --accent:#18d3c6; --muted:#9fb7d6; --glass:rgba(255,255,255,0.03);
+  --good:#34d399; --bad:#fb7185; --gold:#f6c85f;
+}
+html,body{height:100%;margin:0;font-family:"Noto Sans Bengali",Inter,system-ui;background:var(--bg);color:#e6f6ff}
+.container{max-width:980px;margin:14px auto;padding:14px}
+.header{display:flex;align-items:center;justify-content:space-between}
+.title{font-size:18px;color:var(--accent);font-weight:700}
+.subtitle{color:var(--muted);font-size:13px}
+.grid{display:grid;grid-template-columns:1fr 420px;gap:12px;margin-top:12px}
+@media(max-width:900px){.grid{grid-template-columns:1fr}}
+.card{background:var(--panel);border-radius:10px;padding:12px;border:1px solid rgba(255,255,255,0.02)}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.input{width:100%;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.03);background:transparent;color:inherit}
+.button{padding:10px 12px;border-radius:8px;border:none;background:var(--accent);color:#021024;cursor:pointer;font-weight:700}
+.ghost{background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--muted)}
+.small{font-size:13px;color:var(--muted)}
+.out{background:var(--glass);padding:10px;border-radius:8px;margin-top:8px;white-space:pre-wrap}
+.mem{font-family:monospace;font-size:12px;white-space:pre-wrap;overflow:auto;max-height:260px;padding:10px;border-radius:8px;background:rgba(0,0,0,0.2)}
+.stat{display:flex;justify-content:space-between;padding:8px;border-radius:6px;background:rgba(255,255,255,0.02);margin-top:8px}
+.badge{padding:6px 8px;border-radius:999px;background:rgba(255,255,255,0.02);font-size:13px}
+#voteCanvas{width:100%;height:120px;background:transparent;border-radius:6px;margin-top:8px}
+.log{max-height:240px;overflow:auto;padding:6px;background:rgba(255,255,255,0.02);border-radius:8px;margin-top:8px}
 </style>
 </head>
 <body>
-<div class="wrap">
-  <header>
+<div class="container">
+  <div class="header">
     <div>
-      <h1>Hybrid Ultra AI vX — OCR Integrated (Dark)</h1>
-      <div class="sub">একই ফাইলে: Manual input + Screenshot OCR → Top-2 digits, BIG/SMALL prediction, confidence, local learning</div>
+      <div class="title">WINGO ULTRA LEVEL X — BANGLA (v3.6)</div>
+      <div class="subtitle">Cosmic Synaptic Ensemble • Right-Edge OCR • Number Prediction Mode</div>
     </div>
-    <div class="small">Final • Deterministic • Offline</div>
-  </header>
-
-  <div class="card">
-    <div class="small">Input — শেষ ফলাফল (newest-first preferred). সাপোর্ট করে: "period:number" per line, অথবা কেবল সংখ্যাগুলো (স্পেস/কমা/নিউলাইন)</div>
-    <textarea id="inputBox" rows="4" placeholder="উদাহরণ (newest-first): 20251015100011411:6 20251015100011410:1 8 2 5 5 3"></textarea>
-    <div class="row" style="margin-top:8px">
-      <button id="analyzeBtn">🔎 Analyze</button>
-      <button id="predictBtn">🟧 Predict NEXT</button>
-      <button id="recordOpen" class="ghost">📝 Record Result</button>
-      <button id="exportBtn" class="ghost">📤 Export State</button>
-      <button id="importBtn" class="ghost">📥 Import State</button>
-    </div>
-    <div class="hint">MIN history for reliable analysis = 6. Base stake ₹10, Martingale ×3.</div>
+    <div class="small">ডেটা লোকালি সেভ হয় • Deterministic</div>
   </div>
 
-  <div class="grid" style="margin-top:12px">
+  <div class="grid">
+    <!-- Left: Controls & Analysis -->
     <div class="card">
-      <div style="font-weight:700">Analysis & Controls</div>
-      <div id="summaryBox" class="out">No analysis yet.</div>
+      <div style="font-weight:700">ইনপুট — (স্ক্রিনশট/ম্যানুয়াল)</div>
+      <div class="small" style="margin-top:6px">১) স্ক্রিনশট আপলোড করুন (পিরিয়ডের ডান পাশে বড় রঙিন সংখ্যা থাকবে)।<br>২) অথবা নিচে ম্যানুয়ালি শেষ 20 সংখ্যা (newest-first) বসান, স্পেস/কমা দিয়ে আলাদা করুন।</div>
 
-      <!-- OCR area -->
-      <div style="margin-top:10px;font-weight:700">Screenshot OCR</div>
-      <div class="small">Upload a clear screenshot showing last 6–20 results (prefer: period:number or visible digits).</div>
-      <div class="row" style="margin-top:8px">
-        <input type="file" id="screenshotFile" accept="image/*" />
-        <button id="processScreenshotBtn" class="ghost">🖼️ Process Screenshot</button>
-        <button id="ocrPreviewBtn" class="ghost">Preview OCR</button>
+      <div style="margin-top:8px" class="row">
+        <label style="display:inline-flex;align-items:center;gap:8px" class="uploader">
+          <input id="screenshotFile" type="file" accept="image/*" />
+          <button id="processScreenshotBtn" class="ghost">🖼️ স্ক্রিনশট প্রক্রিয়া করো</button>
+        </label>
+        <button id="pasteLastBtn" class="ghost">📋 পুরনো ইতিহাস পেস্ট করে নাও</button>
       </div>
-      <div id="ocrStatus" class="small" style="margin-top:8px">OCR status: idle</div>
-      <div id="ocrPreview" class="out" style="display:none"></div>
 
-      <div style="margin-top:12px;font-weight:700">Method Signals (top contributors)</div>
-      <pre id="methodSignals" class="out small" style="max-height:180px;overflow:auto">No signals yet.</pre>
+      <textarea id="inputBox" class="input" rows="4" placeholder="উদাহতঃ 7 2 5 5 1 8 3 6 0 2 4 5 5 2 3"></textarea>
 
       <div class="row" style="margin-top:8px">
-        <div class="stat"><div>BIG (5–9)</div><div id="bigCnt">-</div></div>
-        <div class="stat"><div>SMALL (0–4)</div><div id="smallCnt">-</div></div>
+        <button id="analyzeBtn" class="button">🔎 বিশ্লেষণ করো</button>
+        <button id="predictBtn" class="button">🎯 পরবর্তী ভবিষ্যদ্বাণী</button>
+        <button id="recordOpen" class="ghost">📝 ফল রেকর্ড করো</button>
       </div>
+
+      <div style="margin-top:10px;font-weight:700">OCR Preview / Parsed Numbers</div>
+      <div id="ocrPreview" class="out small">কিছু নেই</div>
+
+      <div style="margin-top:10px;font-weight:700">Analysis</div>
+      <div id="analysisOut" class="out">এখনো এনালাইসিস হয়নি।</div>
+
+      <div style="margin-top:8px;font-weight:700">Recent Log</div>
+      <div id="log" class="log small"></div>
     </div>
 
+    <!-- Right: Prediction, Memory, Stats -->
     <div class="card">
-      <div style="font-weight:700">Prediction</div>
-      <div id="predictionOut" class="out">No prediction yet.</div>
+      <div style="font-weight:700">PRIMARY PREDICTION</div>
+      <div id="predictionOut" class="out" style="font-size:16px">কোনো প্রেডিকশন নেই</div>
+
       <canvas id="voteCanvas"></canvas>
 
+      <div style="margin-top:10px;font-weight:700">CAPITAL / MARTINGALE</div>
+      <div id="capOut" class="out small">Level: 1 • Next Bet: ₹10 • Total Invested: ₹0</div>
+
+      <div style="margin-top:10px;font-weight:700">PERFORMANCE</div>
+      <div class="stat"><div>Total Rounds</div><div id="statTotal">0</div></div>
+      <div class="stat"><div>Wins</div><div id="statWin">0</div></div>
+      <div class="stat"><div>Losses</div><div id="statLoss">0</div></div>
+      <div class="stat"><div>Accuracy</div><div id="statAcc">N/A</div></div>
+
       <div style="margin-top:10px;font-weight:700">AI_MEMORY_STATE</div>
-      <div id="aiState" class="ai-state"></div>
+      <pre id="aiState" class="mem"></pre>
 
-      <div style="margin-top:6px" class="small">Copy AI_MEMORY_STATE for backup. LocalStorage keeps state automatically.</div>
-    </div>
-  </div>
-
-  <div class="card" style="margin-top:12px">
-    <div style="font-weight:700">History (newest-first)</div>
-    <div id="historyBox" class="out small" style="max-height:180px;overflow:auto">No history saved.</div>
-    <div class="row" style="margin-top:8px">
-      <button id="clearHistory" class="ghost">Clear History</button>
-      <button id="top2Btn" class="ghost">Show Top-2</button>
-    </div>
-  </div>
-
-  <div id="recordCard" class="card" style="display:none;margin-top:12px">
-    <div style="font-weight:700">Record Result (Learning)</div>
-    <div class="small">PID (optional) and actual number (0-9) — model will learn locally.</div>
-    <div style="margin-top:8px">
-      <input id="recPid" placeholder="Period (optional)" />
-      <div style="height:8px"></div>
-      <input id="recNum" placeholder="Number (0-9)" type="number" min="0" max="9"/>
-      <div style="height:8px"></div>
-      <div class="row">
-        <button id="recSubmit">Confirm & Learn</button>
-        <button id="recCancel" class="ghost">Cancel</button>
+      <div style="margin-top:8px" class="row">
+        <button id="exportBtn" class="ghost">📤 Export</button>
+        <button id="importBtn" class="ghost">📥 Import</button>
+        <button id="clearHistory" class="ghost">🧹 Reset All</button>
       </div>
     </div>
   </div>
+</div>
 
+<!-- Record Result Modal (simple) -->
+<div id="recordCard" style="display:none;position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:50">
+  <div style="background:var(--panel);padding:12px;border-radius:10px;border:1px solid rgba(255,255,255,0.03);min-width:320px">
+    <div style="font-weight:700">Record Result (PID optional)</div>
+    <input id="recPid" placeholder="PID (optional)" class="input" style="margin-top:8px"/>
+    <input id="recNum" placeholder="Number 0-9" class="input" style="margin-top:8px"/>
+    <div class="row" style="margin-top:8px;justify-content:flex-end">
+      <button id="recSubmit" class="button">Confirm & Learn</button>
+      <button id="recCancel" class="ghost">Cancel</button>
+    </div>
+  </div>
 </div>
 
 <script>
-/* ============================
-   Hybrid Ultra AI vX + OCR Integrated (Dark)
-   Single-file final edition — Deterministic & Offline
-   ============================ */
+/* --------------------------
+   AI_MEMORY_STATE (persist)
+   --------------------------*/
+const STORAGE_KEY = 'WULX_AI_MEMORY_v3_6';
+function defaultState(){
+  return {
+    last_pid:null,
+    history_newest_first:[], // {period?, number, ts}
+    current_level:1,
+    total_invested:0,
+    last_top_logic:null,
+    last_result:'N/A',
+    last_prediction_pid:null,
+    stats:{total:0,win:0,loss:0}
+  };
+}
+let AI = (function(){ try{ const raw = localStorage.getItem(STORAGE_KEY); if(raw) return JSON.parse(raw);}catch(e){} const s=defaultState(); localStorage.setItem(STORAGE_KEY,JSON.stringify(s)); return s; })();
+function saveAI(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(AI)); renderState(); }
 
-/* ======= Utilities ======= */
+/* --------------------------
+   Utilities
+   --------------------------*/
 const $ = id => document.getElementById(id);
-const clamp = (v,a,b) => Math.max(a,Math.min(b,v));
-const now = () => Date.now();
+const now = ()=>Date.now();
+function clamp(v,a,b){ return Math.max(a,Math.min(b,v)); }
+function asciiDigits(s){ if(!s) return ''; return s.replace(/[০১২৩৪৫৬৭৮৯]/g,m=> '০১২৩৪৫৬৭৮৯'.indexOf(m)); }
 
-/* ======= State & Persistence ======= */
-const STORAGE_KEY = 'HYBRID_ULTRA_AI_VX_OCR';
-function defaultState(){ return {
-  meta:{version:'vX.final.ocr',created: now()},
-  history_newest_first: [], // {period?, number, ts}
-  methods: {}, // methodName -> {correct:0, attempts:0, weight:1.0}
-  current_level:1,
-  total_invested:0,
-  last_top_logic:null,
-  last_result:'N/A',
-  last_prediction_pid:null
-};}
-let STATE = (function(){
-  try{ const raw = localStorage.getItem(STORAGE_KEY); if(raw) return JSON.parse(raw); }
-  catch(e){}
-  const s = defaultState();
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(s));
-  return s;
-})();
-function saveState(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(STATE)); renderState(); }
-function renderState(){ $('aiState').textContent = JSON.stringify(STATE, null, 2); }
+/* --------------------------
+   Right-Edge Extractor (OCR)
+   - Uses Tesseract to get text, then for each non-empty line:
+     find tokens, prefer the right-most single digit token.
+   - Provide preview and allow manual edit in inputBox.
+   --------------------------*/
+$('processScreenshotBtn').addEventListener('click', async ()=>{
+  const files = $('screenshotFile').files;
+  if(!files || files.length===0){ alert('স্ক্রিনশট নির্বাচন করো'); return; }
+  const file = files[0];
+  $('ocrPreview').textContent = 'OCR: চলছে — দয়া করে অপেক্ষা করো...';
+  try{
+    const { createWorker } = Tesseract;
+    const worker = createWorker({ logger: m=>{} });
+    await worker.load();
+    await worker.loadLanguage('eng');
+    await worker.initialize('eng');
+    await worker.setParameters({ tessedit_char_whitelist: '0123456789০১২৩৪৫৬৭৮৯: ', preserve_interword_spaces: '1' });
+    const { data:{ text } } = await worker.recognize(file);
+    await worker.terminate();
+    // split lines, for each take last single-digit token if present
+    const lines = text.split(/\r?\n/).map(l=>l.trim()).filter(Boolean);
+    const parsed = [];
+    for(const line of lines){
+      // normalize bengali digits to ascii
+      const normalized = line.replace(/[০১২৩৪৫৬৭৮৯]/g, ch => '০১২৩৪৫৬৭৮৯'.indexOf(ch));
+      // find all digit tokens
+      const tokens = normalized.match(/\d+/g);
+      if(!tokens) continue;
+      // pick the right-most token that is a single digit, else take last digit of last token
+      let chosen = null;
+      for(let i = tokens.length-1;i>=0;i--){
+        if(tokens[i].length === 1){ chosen = tokens[i]; break; }
+      }
+      if(!chosen){
+        // fallback: use last digit of last token
+        const lastTok = tokens[tokens.length-1];
+        chosen = lastTok.charAt(lastTok.length-1);
+      }
+      if(chosen !== null) parsed.push(chosen);
+    }
+    if(parsed.length < 6){
+      $('ocrPreview').textContent = 'INPUT ERROR: OCR–এ মাত্র ' + parsed.length + ' টি সংখ্যা পাওয়া গেছে — পরিষ্কার স্ক্রিনশট দাও।';
+      return;
+    }
+    // newest-first assumption: OCR usually reads top→down = newest-first may vary; we will place as parsed order.
+    $('ocrPreview').textContent = 'OCR parsed (right-edge): ' + parsed.join(', ');
+    // place into inputBox for user to confirm/edit
+    $('inputBox').value = parsed.join(' ');
+    logAdd('OCR parsed ' + parsed.length + ' numbers');
+  } catch(err){
+    console.error(err);
+    $('ocrPreview').textContent = 'OCR failed — console দেখো';
+  }
+});
 
-/* ======= Parsing functions (robust) ======= */
+/* --------------------------
+   Ensemble Methods (deterministic heuristics)
+   Return suggestions per digit/class
+   --------------------------*/
+function computeDigitScores(historyNums){
+  // historyNums: newest-first array of ints
+  const W = Math.min(historyNums.length, 200);
+  const window = historyNums.slice(0, W);
+  const freq = Array(10).fill(0);
+  const recency = Array(10).fill(0);
+  const lastSeen = Array(10).fill(9999);
+  for(let i=0;i<window.length;i++){
+    const v = window[i];
+    freq[v]++;
+    recency[v] += (W - i);
+    if(lastSeen[v]===9999) lastSeen[v] = i;
+  }
+  // compute run length for last class
+  let runDigit = window.length? window[0] : null;
+  let runLen = 0;
+  for(let i=0;i<window.length;i++){ if(window[i]===runDigit) runLen++; else break; }
+
+  // features to combine deterministically:
+  // - freq normalized
+  // - recency normalized
+  // - inverse lastSeen (gap)
+  // - runBoost for the repeated digit
+  const maxFreq = Math.max(...freq,1);
+  const maxRecency = window.length*(window.length+1)/2 || 1;
+  const scores = [];
+  for(let d=0; d<10; d++){
+    const f = freq[d]/maxFreq;
+    const r = recency[d]/maxRecency;
+    const gap = 1 - clamp(lastSeen[d]/30, 0, 1);
+    const runBoost = (d===runDigit)? clamp(runLen/6, 0, 1) : 0;
+    // fibonacci proximity: if d in fibonacci sequence generated from recent two
+    let fibBoost = 0;
+    if(window.length>=2){
+      let a = window[1], b = window[0];
+      for(let k=0;k<6;k++){ const z = (a+b)%10; if(z===d) fibBoost = 0.06; a=b; b=z; }
+    }
+    // small penalty for 0 and 5 (violet damp)
+    const violet = (d===0 || d===5)? 0.9 : 1.0;
+    // base score linear combination (deterministic weights)
+    const score = (f*0.46 + r*0.28 + gap*0.12 + runBoost*0.08 + fibBoost*0.06) * violet;
+    scores.push({d,score,freq:freq[d],lastSeen:lastSeen[d]});
+  }
+  // normalize scores to sum 1
+  const sum = scores.reduce((s,x)=>s+x.score,0) || 1;
+  scores.forEach(s=>s.prob = s.score/sum);
+  // sort by score desc, tie by freq then lastSeen then smaller digit
+  scores.sort((a,b)=> b.score - a.score || b.freq - a.freq || a.lastSeen - b.lastSeen || a.d - b.d);
+  return scores;
+}
+
+/* Aggregate to Top2 digits & class prediction */
+function aggregatePrediction(historyNums){
+  const digitScores = computeDigitScores(historyNums); // sorted desc
+  const top2 = digitScores.slice(0,2).map(x=>x.d);
+  // class (BIG/SMALL) by sum of probs of digits >=5
+  const bigProb = digitScores.reduce((s,x)=> s + (x.d>=5? x.prob : 0), 0);
+  const smallProb = 1 - bigProb;
+  const predictedClass = bigProb >= smallProb ? 'BIG' : 'SMALL';
+  // confidence derived from dominance ratio and spread
+  const dom = digitScores[0].prob;
+  const spread = dom - digitScores[1].prob;
+  // deterministic mapping to percent
+  let confidence = Math.round( clamp( (0.30 + dom*0.6 + spread*0.4) * 100, 30, 99 ) );
+  // if many signals align (runLen large & top digit frequent) boost
+  const runLenApprox = (()=>{ let r=0; for(let i=1;i<historyNums.length;i++){ if(historyNums[i-1]===historyNums[i]) r++; else break;} return r; })();
+  if(runLenApprox>=4 && digitScores[0].freq>=3) confidence = Math.max(confidence, 92);
+  return { top2, topDigit: digitScores[0].d, bigProb: Math.round(bigProb*100), smallProb: Math.round(smallProb*100), predictedClass, confidence, digitScores };
+}
+
+/* --------------------------
+   UI Handlers
+   --------------------------*/
+function renderPredictionBlock(agg){
+  $('predictionOut').innerHTML = `
+    <div style="font-weight:700">SIZE: ${agg.predictedClass}  •  CONFIDENCE: ${agg.confidence}%</div>
+    <div style="margin-top:6px">TOP 2 DIGITS: <strong>${agg.top2.join(' , ')}</strong></div>
+    <div style="margin-top:6px">TOP DIGIT SUGGESTION: <span style="font-size:20px;font-weight:800">${agg.topDigit}</span></div>
+    <div style="margin-top:6px" class="small">Prob (BIG): ${agg.bigProb}% • Prob (SMALL): ${agg.smallProb}%</div>
+  `;
+  drawVotes(agg.digitScores);
+  AI.last_top_logic = 'cosmic_ensemble_v3';
+  AI.last_prediction_pid = {pid: AI.last_pid || 'NEXT', top2: agg.top2, topDigit: agg.topDigit, predictedClass: agg.predictedClass, confidence: agg.confidence};
+  saveAI();
+}
+
+function drawVotes(digitScores){
+  const canvas = $('voteCanvas'); const ctx = canvas.getContext('2d');
+  canvas.width = canvas.clientWidth; canvas.height = 120; ctx.clearRect(0,0,canvas.width,canvas.height);
+  const w = canvas.width; const h = canvas.height; const barW = (w-20)/10;
+  const maxScore = Math.max(...digitScores.map(x=>x.score), 0.0001);
+  for(let i=0;i<10;i++){
+    const ds = digitScores.find(x=>x.d===i) || {score:0};
+    const barH = (ds.score/maxScore) * (h-40);
+    const x = 10 + i*barW;
+    ctx.fillStyle = (i>=5? '#34d399' : '#fb7185');
+    ctx.fillRect(x, h-20-barH, barW*0.7, barH);
+    ctx.fillStyle = '#cfefff';
+    ctx.font = '12px monospace';
+    ctx.fillText(i.toString(), x+6, h-4);
+  }
+}
+
+/* --------------------------
+   Analyze & Predict buttons
+   --------------------------*/
+$('analyzeBtn').addEventListener('click', ()=>{
+  const txt = $('inputBox').value.trim();
+  const parsed = parseInputText(txt);
+  if(parsed.numbers.length < 6){ $('analysisOut').textContent = 'INPUT ERROR: কমপক্ষে 6টি সংখ্যা দরকার।'; return; }
+  $('analysisOut').textContent = `Analyzed ${parsed.numbers.length} numbers (newest-first).`;
+  const agg = aggregatePrediction(parsed.numbers);
+  renderPredictionBlock(agg);
+  logAdd(`Analyzed ${parsed.numbers.length} numbers → Class:${agg.predictedClass} Top:${agg.topDigit} (${agg.confidence}%)`);
+});
+
+$('predictBtn').addEventListener('click', ()=>{
+  const txt = $('inputBox').value.trim();
+  let arr = parseInputText(txt).numbers;
+  if(!arr.length && AI.history_newest_first.length) arr = AI.history_newest_first.map(h=>h.number);
+  if(arr.length < 6){ alert('ইতিহাস 6+ সংখ্যার নাও, অনুগ্রহ করে ইনপুট বা ইতিহাস যোগ করো'); return; }
+  const agg = aggregatePrediction(arr);
+  renderPredictionBlock(agg);
+  logAdd(`Predict NEXT → Class:${agg.predictedClass} Top:${agg.topDigit} (${agg.confidence}%)`);
+});
+
+/* --------------------------
+   Parsing helper for manual input
+   Accepts "period:number" lines or plain digits
+   Returns newest-first numbers array and lastPeriod
+   --------------------------*/
 function parseInputText(text){
   if(!text) return {numbers:[], lastPeriod:null};
-  // normalize
-  text = text.replace(/\r/g,'\n');
+  text = text.replace(/\r/g, '\n');
   const lines = text.split('\n').map(s=>s.trim()).filter(Boolean);
   const numbers=[];
   let lastPeriod = null;
   for(const line of lines){
     if(/[:\-]/.test(line) && /\d/.test(line)){
       const parts = line.split(/[:\-]/).map(s=>s.trim()).filter(Boolean);
-      // last digit token
       const lastTok = parts[parts.length-1];
-      const matchDigit = lastTok.match(/[0-9]$/);
-      if(matchDigit){ numbers.push(parseInt(matchDigit[0],10)); }
-      else{ // fallback find any digit
-        const ch = line.match(/[0-9]/);
-        if(ch) numbers.push(parseInt(ch[0],10));
-      }
+      const md = lastTok.match(/\d$/);
+      if(md) numbers.push(parseInt(md[0],10));
       const left = parts[0];
       if(left && left.length>4 && /^\d+$/.test(left)) lastPeriod = left;
     } else {
-      // split tokens
-      const toks = line.split(/[\s,.;]+/).filter(Boolean);
+      const toks = line.split(/[\s,;]+/).filter(Boolean);
       for(const t of toks){
-        if(/^[0-9]$/.test(t)) numbers.push(parseInt(t,10));
-        else {
-          const m = t.match(/[0-9]/);
-          if(m) numbers.push(parseInt(m[0],10));
-        }
+        const m = t.match(/[0-9]/);
+        if(m) numbers.push(parseInt(m[0],10));
       }
     }
   }
+  // newest-first: assume input provided newest-first; if user provided oldest-first they can reverse manually
   return {numbers, lastPeriod};
 }
 
-/* ======= History helpers ======= */
-const MAX_HISTORY = 1440;
-function pushHistoryEntry(period, number){
-  STATE.history_newest_first.unshift({period: period || null, number: number, ts: now()});
-  if(STATE.history_newest_first.length>MAX_HISTORY) STATE.history_newest_first.length = MAX_HISTORY;
-  saveState(); renderHistory();
-}
-function renderHistory(){
-  const box = $('historyBox');
-  if(!STATE.history_newest_first.length){ box.textContent = 'No history saved.'; drawVotes([]); return; }
-  box.innerHTML = STATE.history_newest_first.slice(0,200).map((h, idx)=> {
-    const n = h.number; const p = h.period? ` (${h.period})`: '';
-    return `${idx+1}. ${n}${p} — ${new Date(h.ts).toLocaleString()}`;
-  }).join('\n');
-  drawVotes(STATE.history_newest_first.map(h=>h.number));
-}
-
-/* ======= Ensemble methods (deterministic) ======= */
-function ensureMethodStats(name){ if(!STATE.methods[name]) STATE.methods[name] = {correct:0, attempts:0, weight:1.0}; }
-
-function m_dragon_continuation(hist){
-  const cls = hist[0] >=5 ? 'BIG':'SMALL'; let run=1;
-  for(let i=1;i<hist.length;i++){ if((hist[i]>=5? 'BIG':'SMALL')===cls) run++; else break; }
-  if(run>=3) return {class:cls, conf:0.72, reason:`dragon(${run})`}; return {class:null, conf:0, reason:'no'};
-}
-function m_streak_break_4plus(hist){
-  const cls = hist[0]>=5? 'BIG':'SMALL'; let run=1;
-  for(let i=1;i<hist.length;i++){ if((hist[i]>=5? 'BIG':'SMALL')===cls) run++; else break; }
-  if(run>=4) return {class: cls==='BIG'?'SMALL':'BIG', conf:0.78, reason:`streak_break(${run})`}; return {class:null, conf:0, reason:'no'};
-}
-function m_hot_digit_follow(hist){
-  const w = hist.slice(0,20); const freq = Array(10).fill(0);
-  for(const v of w) freq[v]++; let top=0,topc=0;
-  for(let d=0;d<10;d++){ if(freq[d]>topc){ top=d; topc=freq[d]; } }
-  if(topc>=3) return {class: top>=5?'BIG':'SMALL', conf:0.5 + clamp((topc-3)*0.06,0,0.25), reason:`hot${top}`};
-  return {class:null, conf:0, reason:'no'};
-}
-function m_cold_digit_rebound(hist){
-  const w=hist.slice(0,12), seen=new Set(w);
-  for(let d=0;d<=9;d++){ if(!seen.has(d)) return {class:d>=5?'BIG':'SMALL', conf:0.32, reason:`cold${d}`}; }
-  return {class:null, conf:0, reason:'no'};
-}
-function m_recency_gap_trigger(hist){
-  if(hist.length<2) return {class:null, conf:0, reason:'na'}; const last=hist[0];
-  for(let i=1;i<Math.min(hist.length,18);i++){ if(hist[i]===last) return {class:last>=5?'BIG':'SMALL', conf:0.42, reason:`rec_gap(${i})`}; }
-  return {class:null, conf:0, reason:'no'};
-}
-function m_fibonacci_mod10(hist){
-  if(hist.length<2) return {class:null, conf:0, reason:'na'}; const a=hist[0], b=hist[1]; const pred=(a+b)%10;
-  return {class: pred>=5?'BIG':'SMALL', conf:0.34, reason:`fib${pred}`};
-}
-function m_pair_echo(hist){
-  if(hist.length<2) return {class:null, conf:0, reason:'na'}; if(hist[0]===hist[1]) return {class:hist[0]>=5?'BIG':'SMALL', conf:0.44, reason:'pair_echo'}; return {class:null, conf:0, reason:'no'};
-}
-function m_triple_sequence_follow(hist){
-  if(hist.length<3) return {class:null, conf:0, reason:'na'}; if(hist[0]===hist[1] && hist[1]===hist[2]) return {class:hist[0]>=5?'BIG':'SMALL', conf:0.6, reason:'triple'}; return {class:null, conf:0, reason:'no'};
-}
-function m_size_balance_correction(hist){
-  const w=hist.slice(0,30); let big=0; for(const v of w) if(v>=5) big++;
-  if(big/w.length>0.65) return {class:'SMALL', conf:0.33, reason:'bal_high_big'}; if(big/w.length<0.35) return {class:'BIG', conf:0.33, reason:'bal_low_big'}; return {class:null, conf:0, reason:'no'};
-}
-function m_fallback_gentle(hist){
-  const w=hist.slice(0,20); if(!w.length) return {class:null,conf:0,reason:'na'}; let big=0; for(const v of w) if(v>=5) big++; return {class: big>=w.length/2?'BIG':'SMALL', conf:0.30, reason:'fallback'};
-}
-
-const METHODS = [ m_dragon_continuation, m_streak_break_4plus, m_hot_digit_follow, m_cold_digit_rebound, m_recency_gap_trigger, m_fibonacci_mod10, m_pair_echo, m_triple_sequence_follow, m_size_balance_correction, m_fallback_gentle ];
-
-/* ======= Digit scoring ======= */
-function computeDigitScores(historyNums){
-  const window = historyNums.slice(0,200);
-  const freq = Array(10).fill(0), recency = Array(10).fill(0), lastSeen = Array(10).fill(9999);
-  for(let i=0;i<window.length;i++){ const v=window[i]; freq[v]++; recency[v]+=(window.length - i); if(lastSeen[v]===9999) lastSeen[v]=i; }
-  const fibCandidates = (() => { if(window.length<2) return []; const a=window[1], b=window[0]; let x=a,y=b,out=[]; for(let i=0;i<6;i++){ const z=(x+y)%10; out.push(z); x=y;y=z;} return out; })();
-  const w_freq=0.46,w_recency=0.28,w_gap=0.12,w_run=0.08,w_fib=0.06;
-  const runDigit = window[0]; let runLen=1; for(let i=1;i<window.length;i++){ if(window[i]===runDigit) runLen++; else break; }
-  const scores=[];
-  for(let d=0;d<10;d++){
-    const freqNorm = freq[d]/Math.max(1,window.length);
-    const recNorm = recency[d]/Math.max(1,(window.length*(window.length+1)/2));
-    const gapNorm = 1 - (Math.min(lastSeen[d],30)/30);
-    const runBoost = (d===runDigit)? clamp(runLen/6,0,1) : 0;
-    const fibBoost = fibCandidates.includes(d) ? 0.06 : 0;
-    let score = freqNorm*w_freq + recNorm*w_recency + gapNorm*w_gap + runBoost*w_run + fibBoost*w_fib;
-    if(d===0 || d===5) score *= 0.9;
-    scores.push({d,score,freq:freq[d],lastSeen:lastSeen[d]});
-  }
-  return scores;
-}
-
-/* ======= Aggregation ======= */
-const METHOD_CONF_MIN = 0.30, METHOD_CONF_MAX = 0.85;
-function aggregateEnsemble(historyNums){
-  const votes = {BIG:0,SMALL:0}, contributors=[];
-  for(const fn of METHODS){
-    try{
-      const out = fn(historyNums);
-      if(out && out.class){
-        ensureMethodStats(fn.name);
-        const stats = STATE.methods[fn.name];
-        const skillRatio = (stats.attempts>0)? (stats.correct/stats.attempts) : 0.5;
-        const weight = 0.7 + skillRatio*0.65;
-        const eff_conf = clamp(out.conf, METHOD_CONF_MIN, METHOD_CONF_MAX) * weight;
-        votes[out.class] += eff_conf;
-        contributors.push({method: fn.name, cls: out.class, eff_conf, reason: out.reason});
-      }
-    } catch(e){}
-  }
-  const last = historyNums[0]; if(last===0 || last===5){ votes.BIG*=0.92; votes.SMALL*=0.92; }
-  const distinct = contributors.length;
-  const diversityFactor = distinct>=4?1.06:0.94; votes.BIG*=diversityFactor; votes.SMALL*=diversityFactor;
-  const total = votes.BIG + votes.SMALL;
-  let predicted='SMALL', conf=35;
-  if(total>0){
-    predicted = votes.BIG > votes.SMALL ? 'BIG' : 'SMALL';
-    const dom = Math.max(votes.BIG, votes.SMALL);
-    const raw = clamp(((dom/Math.max(1,total))*0.72) + ((distinct/METHODS.length)*0.28), 0.30, 0.99);
-    conf = Math.round(30 + raw*69);
-    const highAgree = contributors.filter(c=>c.eff_conf>=0.7 && c.cls===predicted).length;
-    if(highAgree>=5) conf = 100;
-  }
-  const digitScores = computeDigitScores(historyNums);
-  digitScores.sort((a,b)=>{ if(b.score!==a.score) return b.score-a.score; if(b.freq!==a.freq) return b.freq-a.freq; if(a.lastSeen!==b.lastSeen) return a.lastSeen-b.lastSeen; return a.d-b.d; });
-  const top2 = digitScores.slice(0,2).map(x=>x.d);
-  return {predicted, confidence: conf, contributors, votes, top2, digitScores};
-}
-
-/* ======= Martingale & learning ======= */
-const BASE_STAKE = 10;
-function currentStake(){ const level = STATE.current_level||1; return BASE_STAKE * Math.pow(3, level-1); }
-function recordInvestment(amount){ STATE.total_invested = (STATE.total_invested||0) + amount; saveState(); }
-
-function learnFromResult(pid, actualNumber, predictedObj){
-  pushHistoryEntry(pid, actualNumber);
-  const actualClass = actualNumber>=5? 'BIG':'SMALL';
-  const snapshot = STATE.history_newest_first.slice(1).map(h=>h.number);
-  for(const fn of METHODS){
-    ensureMethodStats(fn.name);
-    const out = fn(snapshot);
-    const stats = STATE.methods[fn.name];
-    stats.attempts = (stats.attempts||0) + 1;
-    if(out && out.class && out.class===actualClass) stats.correct = (stats.correct||0) + 1;
-    const perf = (stats.attempts>0)? (stats.correct / stats.attempts) : 0.5;
-    stats.weight = 0.7 + perf*0.65;
-    if(out && out.conf>=0.7 && out.class && out.class!==actualClass) stats.weight = clamp(stats.weight - 0.08, 0.5, 1.5);
-  }
-  if(STATE.last_prediction_pid && pid && STATE.last_prediction_pid === pid){
-    const predictedClass = predictedObj? predictedObj.predicted : null;
-    if(predictedClass && predictedClass===actualClass){ STATE.last_result='WIN'; STATE.current_level=1; } else { STATE.last_result='LOSS'; STATE.current_level=(STATE.current_level||1)+1; }
-  } else { STATE.last_result='N/A'; }
-  recordInvestment(currentStake());
-  saveState();
-}
-
-/* ======= Rendering & chart ======= */
-function renderPrediction(pred){
-  const out = $('predictionOut');
-  const voteText = `SIZE: ${pred.predicted}  • Confidence: ${pred.confidence}%`;
-  const top2 = pred.top2.join(', ');
-  const dom = pred.contributors.length? pred.contributors[0].method : 'n/a';
-  out.innerHTML = `<div style="font-weight:700">${voteText}</div>
-    <div style="margin-top:6px">Top-2 digits: <strong>${top2}</strong></div>
-    <div style="margin-top:6px">Dominant Logic: <strong>${dom}</strong></div>
-    <div style="margin-top:6px">Invest Level: <strong>Level ${STATE.current_level||1}</strong> • Next Bet: ₹${currentStake()}</div>`;
-  renderMethods(pred.contributors);
-}
-function renderMethods(contributors){
-  const el = $('methodSignals');
-  if(!contributors || !contributors.length){ el.textContent = 'No signals.'; return; }
-  const lines = contributors.map(c=>`${c.method} → ${c.cls} @ ${(c.eff_conf*100|0)}%   (${c.reason})`);
-  el.textContent = lines.join('\n');
-}
-function drawVotes(digits){
-  const canvas = $('voteCanvas'); const ctx = canvas.getContext('2d');
-  canvas.width = canvas.clientWidth; canvas.height = 140; ctx.clearRect(0,0,canvas.width,canvas.height);
-  if(!digits || !digits.length){ ctx.fillStyle='rgba(255,255,255,0.03)'; ctx.font='12px sans-serif'; ctx.fillText('No history to visualize',10,20); return; }
-  const counts = Array(10).fill(0); for(const d of digits) counts[d]++;
-  const maxc = Math.max(...counts); const w = canvas.clientWidth, h=canvas.clientHeight, barW = (w-20)/10;
-  for(let d=0; d<10; d++){ const x = 10 + d*barW; const barH = maxc? (counts[d]/maxc)*(h-40) : 0; ctx.fillStyle = (d>=5? '#34d399':'#fb7185'); ctx.fillRect(x, h-20-barH, barW-6, barH); ctx.fillStyle='#cfefff'; ctx.font='12px monospace'; ctx.fillText(d.toString(), x+4, h-4); }
-}
-
-/* ======= OCR integration (Tesseract) ======= */
-async function runOCR(file){
-  $('ocrStatus').textContent = 'OCR status: running…';
-  try{
-    const { createWorker } = Tesseract;
-    const worker = createWorker({ logger: m => {} });
-    await worker.load(); await worker.loadLanguage('eng'); await worker.initialize('eng');
-    await worker.setParameters({ tessedit_char_whitelist: '0123456789:. ', preserve_interword_spaces: '1' });
-    const { data:{text} } = await worker.recognize(file);
-    await worker.terminate();
-    $('ocrStatus').textContent = 'OCR status: finished';
-    return text;
-  } catch(err){
-    $('ocrStatus').textContent = 'OCR status: failed';
-    console.error('OCR error', err); throw err;
-  }
-}
-function extractDigitsFromOCRText(text){
-  if(!text) return [];
-  // map Bengali digits if present
-  const mapIndic = {'০':'0','১':'1','২':'2','৩':'3','৪':'4','৫':'5','৬':'6','৭':'7','৮':'8','৯':'9'};
-  text = text.replace(/[০-৯]/g, m => mapIndic[m] || m);
-  const tokens = text.match(/[0-9]/g);
-  if(!tokens) return [];
-  // return array in order OCR found (user can reverse if needed)
-  return tokens.map(t => parseInt(t,10));
-}
-
-/* ======= Event handlers ======= */
-$('analyzeBtn').addEventListener('click', ()=>{
-  const txt = $('inputBox').value.trim(); const parsed = parseInputText(txt); const nums = parsed.numbers;
-  if(nums.length < 6){ $('summaryBox').textContent = 'INPUT ERROR: Provide at least 6 numbers for reliable analysis.'; return; }
-  const historyNums = nums.slice(0, Math.min(nums.length, 200));
-  const agg = aggregateEnsemble(historyNums);
-  $('bigCnt').textContent = historyNums.filter(n=>n>=5).length; $('smallCnt').textContent = historyNums.filter(n=>n<5).length;
-  $('summaryBox').innerHTML = `Analyzed: ${historyNums.length} | Distinct: ${new Set(historyNums).size} | Last window: ${historyNums.slice(0,12).join(', ')}`;
-  renderPrediction(agg);
-  if(parsed.lastPeriod){ try{ STATE.last_prediction_pid = (BigInt(parsed.lastPeriod) + 1n).toString(); }catch(e){ STATE.last_prediction_pid = parsed.lastPeriod; } }
-  STATE.last_top_logic = agg.contributors.length ? agg.contributors[0].method : STATE.last_top_logic; saveState();
-});
-
-$('predictBtn').addEventListener('click', ()=>{
-  const txt = $('inputBox').value.trim(); let parsed = parseInputText(txt); let nums = parsed.numbers;
-  if(!nums.length && STATE.history_newest_first.length) nums = STATE.history_newest_first.map(h=>h.number);
-  if(nums.length < 6){ alert('Provide at least 6 numbers (input or local history)'); return; }
-  const agg = aggregateEnsemble(nums.slice(0,200));
-  STATE.last_prediction_pid = parsed.lastPeriod || STATE.last_prediction_pid; STATE.last_top_logic = agg.contributors.length? agg.contributors[0].method : STATE.last_top_logic; saveState();
-  renderPrediction(agg);
-});
-
-/* OCR UI */
-$('processScreenshotBtn').addEventListener('click', async ()=>{
-  const files = $('screenshotFile').files; if(!files || !files.length){ alert('Select an image file first'); return; }
-  const file = files[0];
-  try{
-    const text = await runOCR(file); $('ocrPreview').style.display='block'; $('ocrPreview').textContent = text;
-    const digits = extractDigitsFromOCRText(text);
-    if(digits.length < 6){ $('ocrStatus').textContent = 'INPUT ERROR: OCR found only ' + digits.length + ' digits. Provide clearer screenshot.'; return; }
-    // place into inputBox (newest-first assumed as OCR order). Show to user then analyze automatically.
-    $('inputBox').value = digits.join(' ');
-    $('analyzeBtn').click();
-  } catch(e){ alert('OCR failed — check console for details'); }
-});
-$('ocrPreviewBtn').addEventListener('click', ()=>{ const el = $('ocrPreview'); el.style.display = el.style.display==='none'? 'block':'none'; });
-
-/* Record result handling */
+/* --------------------------
+   Record result (learning) & martingale update
+   --------------------------*/
 $('recordOpen').addEventListener('click', ()=>{ $('recordCard').style.display='block'; });
 $('recCancel').addEventListener('click', ()=>{ $('recordCard').style.display='none'; });
+
 $('recSubmit').addEventListener('click', ()=>{
-  const pid = $('recPid').value.trim() || null; const nRaw = $('recNum').value.trim(); const n = parseInt(nRaw,10);
-  if(isNaN(n) || n<0 || n>9){ alert('Enter number 0-9'); return; }
-  const inputTxt = $('inputBox').value.trim(); const parsed = parseInputText(inputTxt); let nums = parsed.numbers;
-  const predictedObj = nums.length>=6 ? aggregateEnsemble(nums.slice(0,200)) : null;
-  learnFromResult(pid, n, predictedObj);
+  const pid = $('recPid').value.trim() || null;
+  const nRaw = $('recNum').value.trim();
+  const n = parseInt(nRaw,10);
+  if(isNaN(n) || n<0 || n>9){ alert('0-9 সংখ্যা দিন'); return; }
+  // record
+  AI.history_newest_first.unshift({period: pid, number: n, ts: now()});
+  if(AI.history_newest_first.length > 1440) AI.history_newest_first.length = 1440;
+  // update stats & martingale
+  AI.stats.total = (AI.stats.total||0) + 1;
+  const lastPred = AI.last_prediction_pid;
+  let resultWin = false;
+  if(lastPred && lastPred.top2 && lastPred.top2.includes(n)){ resultWin = true; }
+  const actualClass = n>=5? 'BIG':'SMALL';
+  if(lastPred && lastPred.predictedClass === actualClass) resultWin = true;
+  if(resultWin){
+    AI.stats.win = (AI.stats.win||0) + 1;
+    AI.last_result = 'WIN';
+    AI.current_level = 1;
+  } else {
+    AI.stats.loss = (AI.stats.loss||0) + 1;
+    AI.last_result = 'LOSS';
+    AI.current_level = (AI.current_level||1) + 1;
+  }
+  // stake accounting (3x martingale)
+  const stake = 10 * Math.pow(3, (AI.current_level||1)-1);
+  AI.total_invested = (AI.total_invested||0) + stake;
+  AI.last_pid = pid || AI.last_pid;
+  saveAI();
+  renderState();
   $('recordCard').style.display='none';
-  alert(JSON.stringify({status:'learned', pid: pid, number: n, new_state: STATE}, null, 2));
-  renderHistory();
+  logAdd(`Recorded PID:${pid||'-'} Number:${n} → ${AI.last_result}`);
 });
 
-/* export/import state */
+/* --------------------------
+   State rendering & helpers
+   --------------------------*/
+function renderState(){
+  $('aiState').textContent = JSON.stringify(AI, null, 2);
+  $('statTotal').textContent = AI.stats.total || 0;
+  $('statWin').textContent = AI.stats.win || 0;
+  $('statLoss').textContent = AI.stats.loss || 0;
+  const acc = AI.stats.total ? Math.round((AI.stats.win/AI.stats.total)*1000)/10 : 'N/A';
+  $('statAcc').textContent = acc === 'N/A' ? 'N/A' : acc + '%';
+  $('capOut').textContent = `Level: ${AI.current_level||1} • Next Bet: ₹${10 * Math.pow(3, (AI.current_level||1)-1)} • Total Invested: ₹${AI.total_invested||0}`;
+}
+function logAdd(txt){
+  const div = $('log');
+  const nowStr = new Date().toLocaleString('bn-BD');
+  const el = document.createElement('div'); el.textContent = `${nowStr} — ${txt}`; div.insertBefore(el, div.firstChild);
+  // keep log length reasonable
+  while(div.childNodes.length > 200) div.removeChild(div.lastChild);
+}
+
+/* export/import/reset */
 $('exportBtn').addEventListener('click', ()=>{
-  const payload = JSON.stringify(STATE, null, 2); const blob = new Blob([payload], {type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='hybrid_ultra_ai_vx_state.json'; document.body.appendChild(a); a.click(); a.remove();
+  const blob = new Blob([JSON.stringify(AI, null, 2)], {type:'application/json'});
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'wulx_ai_memory.json'; a.click();
 });
 $('importBtn').addEventListener('click', ()=>{
-  const fi=document.createElement('input'); fi.type='file'; fi.accept='.json'; fi.onchange = e => {
-    const f = e.target.files[0]; if(!f) return; const r=new FileReader(); r.onload = ev => {
-      try{ const obj = JSON.parse(ev.target.result); if(obj && obj.history_newest_first){ STATE = obj; saveState(); alert('Imported state.'); renderHistory(); } else alert('Invalid file'); } catch(err){ alert('Import failed: '+err); }
+  const fi = document.createElement('input'); fi.type='file'; fi.accept='.json'; fi.onchange = e=>{
+    const f = e.target.files[0]; if(!f) return;
+    const r = new FileReader(); r.onload = ev => {
+      try{ const obj = JSON.parse(ev.target.result); if(obj && obj.history_newest_first){ AI = obj; saveAI(); alert('Imported.'); } else alert('Invalid file'); } catch(err){ alert('Import failed'); }
     }; r.readAsText(f);
   }; fi.click();
 });
+$('clearHistory').addEventListener('click', ()=>{
+  if(!confirm('সব history মুছে ফেলতে চাও?')) return;
+  AI = defaultState(); saveAI(); renderState(); logAdd('State reset');
+});
 
-/* history controls */
-$('clearHistory').addEventListener('click', ()=>{ if(!confirm('Clear local history and reset state?')) return; STATE = defaultState(); saveState(); renderHistory(); });
-$('top2Btn').addEventListener('click', ()=>{ const nums = STATE.history_newest_first.map(h=>h.number); if(nums.length<6) return alert('History too small'); const agg = aggregateEnsemble(nums); alert('Top-2: ' + agg.top2.join(', ') + ' • Confidence: ' + agg.confidence + '%'); });
+/* Paste last history helper (from local state) */
+$('pasteLastBtn').addEventListener('click', ()=> {
+  if(!AI.history_newest_first.length) return alert('কোনো history নেই');
+  const nums = AI.history_newest_first.slice(0,20).map(h=>h.number).join(' ');
+  $('inputBox').value = nums;
+  $('ocrPreview').textContent = 'পূর্বের local history pasted.';
+});
 
-/* ======= Initialization ======= */
+/* init */
 renderState();
-renderHistory();
-if(STATE.history_newest_first.length>0){ const arr = STATE.history_newest_first.map(h=>h.number); const agg = aggregateEnsemble(arr.slice(0,200)); renderPrediction(agg); }
+if(AI.history_newest_first.length){
+  logAdd('Loaded local history (' + AI.history_newest_first.length + ' records)');
+}
+
+/* ensure canvas initial */
+drawVotes(Array.from({length:10},(_,i)=>({d:i,score:0.001})));
 
 </script>
 </body>
