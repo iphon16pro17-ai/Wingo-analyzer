@@ -442,10 +442,8 @@ log('Cosmic Analyzer v5.0 loaded');
 /* auto-resize canvas on load */
 window.addEventListener('resize', ()=> drawVoteChart(Array.from({length:10},(_,i)=>({d:i,score:0.001})))));
 drawVoteChart(Array.from({length:10},(_,i)=>({d:i,score:0.001})));
-</script>
-</body>
-</html>
-<script>
+</script> 
+  <script>
 /* 🔹 WINGO ULTRA LEVEL X v5.0 – Bangla Full Build */
 let wins = localStorage.getItem("wins") ? parseInt(localStorage.getItem("wins")) : 0;
 let losses = localStorage.getItem("losses") ? parseInt(localStorage.getItem("losses")) : 0;
@@ -505,8 +503,8 @@ document.addEventListener("DOMContentLoaded", () => {
   document.body.appendChild(perfBox);
   updatePerformance();
 });
-</script>
-<script>
+</script>  
+  <script>
 document.addEventListener("DOMContentLoaded", () => {
   const analyzeBtn = document.querySelector('button:contains("বিশ্লেষণ করো")') || document.querySelector('button:contains("Analyze")');
   const predictBtn = document.querySelector('button:contains("Predict NEXT")');
@@ -606,3 +604,5 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 });
 </script>
+</body>
+</html>
