@@ -445,3 +445,64 @@ drawVoteChart(Array.from({length:10},(_,i)=>({d:i,score:0.001})));
 </script>
 </body>
 </html>
+<script>
+/* 🔹 WINGO ULTRA LEVEL X v5.0 – Bangla Full Build */
+let wins = localStorage.getItem("wins") ? parseInt(localStorage.getItem("wins")) : 0;
+let losses = localStorage.getItem("losses") ? parseInt(localStorage.getItem("losses")) : 0;
+let totalRounds = wins + losses;
+
+function updatePerformance() {
+  const accuracy = totalRounds ? ((wins / totalRounds) * 100).toFixed(1) : "N/A";
+  document.getElementById("totalRounds").innerText = totalRounds;
+  document.getElementById("wins").innerText = wins;
+  document.getElementById("losses").innerText = losses;
+  document.getElementById("accuracy").innerText = accuracy + "%";
+}
+
+function recordResult(isWin) {
+  if (isWin) wins++;
+  else losses++;
+  totalRounds = wins + losses;
+  localStorage.setItem("wins", wins);
+  localStorage.setItem("losses", losses);
+  updatePerformance();
+}
+
+function calculateConfidence(data) {
+  let digits = data.split("").map(Number);
+  let small = digits.filter(d => d <= 4).length;
+  let big = digits.filter(d => d >= 5).length;
+  let confidence = Math.round(Math.abs(small - big) / digits.length * 100);
+  return Math.max(40, Math.min(92, 50 + confidence / 2));
+}
+
+function runPrediction(input) {
+  let conf = calculateConfidence(input);
+  let top = input[input.length - 1];
+  let next = (parseInt(top) + 1) % 10;
+  document.getElementById("resultDisplay").innerHTML =
+    `<b>Confidence:</b> ${conf}%<br><b>Top Digit:</b> ${top}<br><b>Next Prediction:</b> ${next}`;
+}
+
+/* 🔹 Auto Initialize UI elements */
+document.addEventListener("DOMContentLoaded", () => {
+  const perfBox = document.createElement("div");
+  perfBox.innerHTML = `
+  <div style="margin-top:10px;padding:12px;background:#0b2030;border-radius:12px;">
+    <h4 style="margin-bottom:8px;color:#18d3c6;">Performance Tracker</h4>
+    <p>Total Rounds: <span id="totalRounds">0</span></p>
+    <p>Wins: <span id="wins">0</span></p>
+    <p>Losses: <span id="losses">0</span></p>
+    <p>Accuracy: <span id="accuracy">N/A</span></p>
+    <button onclick="recordResult(true)">+ Win</button>
+    <button onclick="recordResult(false)">+ Loss</button>
+  </div>
+  <div style="margin-top:10px;padding:12px;background:#142f45;border-radius:12px;">
+    <h4 style="color:#18d3c6;">AI Confidence Result</h4>
+    <div id="resultDisplay">No result yet.</div>
+  </div>
+  `;
+  document.body.appendChild(perfBox);
+  updatePerformance();
+});
+</script>
