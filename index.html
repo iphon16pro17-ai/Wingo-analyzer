@@ -1,96 +1,11 @@
 <!DOCTYPE html>
-<html lang="bn">
+<html>
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Wingo Big/Small Analyzer (বাংলা)</title>
-  <style>
-    body {
-      font-family: "Noto Sans Bengali", sans-serif;
-      background: #0f172a;
-      color: #e2e8f0;
-      text-align: center;
-      padding: 20px;
-    }
-    h1 {
-      color: #38bdf8;
-      margin-bottom: 10px;
-    }
-    textarea {
-      width: 90%;
-      height: 100px;
-      background: #1e293b;
-      color: #f8fafc;
-      border: 1px solid #334155;
-      border-radius: 8px;
-      padding: 10px;
-      font-size: 16px;
-    }
-    button {
-      margin: 10px;
-      padding: 10px 20px;
-      border: none;
-      border-radius: 8px;
-      font-size: 16px;
-      cursor: pointer;
-      background: #2563eb;
-      color: white;
-    }
-    button:hover { background: #1d4ed8; }
-    .result {
-      margin-top: 20px;
-      background: #1e293b;
-      padding: 15px;
-      border-radius: 10px;
-      font-size: 18px;
-    }
-  </style>
+  <title>Wingo Analyzer Ultra Pro</title>
 </head>
-<body>
-  <h1>🎯 Wingo Big/Small Analyzer (বাংলা)</h1>
-  <p>শেষের ২০টি সংখ্যা লিখুন (স্পেস বা কমা দিয়ে আলাদা করুন):</p>
-  <textarea id="numbersInput" placeholder="যেমনঃ 5 3 2 8 0 4 6 9 ..."></textarea><br />
-  <button onclick="analyze()">বিশ্লেষণ করো</button>
-  <button onclick="document.getElementById('numbersInput').value='';document.getElementById('result').innerHTML=''">মুছে ফেলো</button>
-
-  <div class="result" id="result"></div>
-
-  <script>
-    function analyze() {
-      const input = document.getElementById("numbersInput").value.trim();
-      if (!input) return alert("অনুগ্রহ করে কিছু সংখ্যা লিখুন!");
-      const nums = input.split(/[\s,]+/).map(Number).filter(n => !isNaN(n) && n >= 0 && n <= 9);
-      if (nums.length < 6) return alert("কমপক্ষে ৬টি সংখ্যা দিন বিশ্লেষণের জন্য।");
-
-      const lastTen = nums.slice(-10);
-      const bigCount = lastTen.filter(n => n >= 5).length;
-      const smallCount = 10 - bigCount;
-      const streak = (() => {
-        let count = 1;
-        for (let i = lastTen.length - 2; i >= 0; i--) {
-          if ((lastTen[i] >= 5) === (lastTen[i+1] >= 5)) count++;
-          else break;
-        }
-        return count;
-      })();
-
-      let bias = bigCount > smallCount ? "BIG" : "SMALL";
-      let conf = Math.round(Math.abs(bigCount - smallCount) / 10 * 70 + streak * 5 + 30);
-      if (conf > 95) conf = 95;
-
-      let nextGuess = bias;
-      if (streak >= 4) nextGuess = bias === "BIG" ? "SMALL" : "BIG"; // streak break logic
-
-      document.getElementById("result").innerHTML = `
-        <b>📊 বিশ্লেষণ সম্পন্ন</b><br><br>
-        সাম্প্রতিক ১০টি ফলাফলঃ ${lastTen.join(", ")}<br>
-        BIG: ${bigCount}, SMALL: ${smallCount}<br>
-        🔁 টানা একই সাইজঃ ${streak} বার<br><br>
-        👉 <b>পরবর্তী সম্ভাবনা:</b> ${nextGuess === "BIG" ? "বড় (BIG)" : "ছোট (SMALL)"}<br>
-        🔥 <b>আত্মবিশ্বাস:</b> ${conf}%<br><br>
-        ⚙️ ভিত্তি: প্রবণতা, অনুপাত ও স্ট্রিক বিশ্লেষণ
-      `;
-    }
-  </script>
+<body style="font-family: Arial; text-align: center; margin-top: 50px;">
+  <h1>✅ Wingo Analyzer is Live!</h1>
+  <p>This is your AI predictor system. Future predictions will appear here.</p>
 </body>
 </html>
