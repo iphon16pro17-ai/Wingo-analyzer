@@ -3,204 +3,127 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>DKWin9 Demo Platform</title>
-  <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
-  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <title>DKWin9 Platform Demo</title>
   <style>
+    * {
+      margin: 0; padding: 0; box-sizing: border-box;
+      font-family: "Poppins", sans-serif;
+    }
     body {
-      font-family: Arial, sans-serif;
-      background: #0f172a;
+      background: linear-gradient(180deg, #0b1120, #141b2d);
       color: #fff;
-      margin: 0;
-      padding: 0;
+      display: flex; justify-content: center; align-items: center;
+      min-height: 100vh;
     }
-    .app {
+    .container {
+      width: 100%; max-width: 400px;
+      background: rgba(255,255,255,0.05);
+      padding: 30px;
+      border-radius: 16px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.4);
       text-align: center;
-      padding: 20px;
     }
-    .header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .logout-btn {
-      background: crimson;
-      border: none;
-      padding: 6px 12px;
-      border-radius: 6px;
-      cursor: pointer;
-      color: white;
-    }
-    .auth-box,
-    .bet-box,
-    .recent-box {
-      background: #1e293b;
-      margin: 20px auto;
-      padding: 20px;
-      border-radius: 10px;
-      max-width: 400px;
+    h1 {
+      font-size: 26px;
+      color: #4fc3f7;
+      margin-bottom: 20px;
     }
     input {
-      padding: 10px;
-      border-radius: 6px;
-      border: none;
-      width: 80%;
+      width: 100%;
+      padding: 12px;
       margin: 10px 0;
-    }
-    button {
-      background: #2563eb;
-      color: white;
       border: none;
-      padding: 10px 15px;
       border-radius: 8px;
-      margin: 5px;
+      outline: none;
+      font-size: 16px;
+    }
+    .btn {
+      display: inline-block;
+      background: #3b82f6;
+      color: #fff;
+      padding: 12px 24px;
+      margin-top: 10px;
+      border-radius: 8px;
+      text-decoration: none;
+      transition: 0.2s;
+    }
+    .btn:hover {
+      background: #2563eb;
+    }
+    .link {
+      color: #60a5fa;
+      text-decoration: underline;
+      font-size: 14px;
       cursor: pointer;
     }
-    button:disabled {
-      background: gray;
-      cursor: not-allowed;
+    .hidden {
+      display: none;
     }
-    .result {
-      font-size: 1.2em;
-      margin-top: 10px;
+    .dashboard {
+      text-align: left;
     }
-    ul {
-      list-style: none;
-      padding: 0;
+    .balance {
+      font-size: 20px;
+      color: #22c55e;
+      margin-bottom: 10px;
+    }
+    .btn-small {
+      background: #6366f1;
+      padding: 10px 16px;
+      border-radius: 6px;
+      font-size: 14px;
+      margin: 4px;
+      cursor: pointer;
+      display: inline-block;
+    }
+    .btn-small:hover {
+      background: #4f46e5;
     }
   </style>
 </head>
 <body>
-  <div id="root"></div>
+  <div class="container" id="login-page">
+    <h1>🎯 DKWin9 Demo</h1>
+    <p>Login / Register</p>
+    <input type="text" placeholder="Enter Username" id="username" />
+    <input type="text" placeholder="Invitation Code" id="invite" />
+    <div class="btn" onclick="enterPlatform()">Enter Platform</div>
+  </div>
 
-  <script type="text/babel">
-    const { useState, useEffect } = React;
+  <div class="container hidden" id="dashboard">
+    <h1>🎮 DKWin9 Dashboard</h1>
+    <p class="balance">Balance: $1000.00</p>
+    <div>
+      <span class="btn-small">Bet Small</span>
+      <span class="btn-small">Bet Big</span>
+      <span class="btn-small">Bet Even</span>
+      <span class="btn-small">Bet Odd</span>
+    </div>
+    <br />
+    <p>Recent Results:</p>
+    <ul id="results" style="margin-top:10px; list-style:none;">
+      <li>08:59 → EVEN</li>
+      <li>08:58 → ODD</li>
+      <li>08:57 → EVEN</li>
+    </ul>
+    <br />
+    <div class="btn" onclick="logout()">Logout</div>
+  </div>
 
-    // --- Storage utils ---
-    const saveUser = (user) => localStorage.setItem("user", JSON.stringify(user));
-    const getUser = () => JSON.parse(localStorage.getItem("user"));
-    const logout = () => localStorage.removeItem("user");
-    const saveResult = (res) => {
-      const all = JSON.parse(localStorage.getItem("results") || "[]");
-      all.push(res);
-      localStorage.setItem("results", JSON.stringify(all));
-    };
-    const getResults = () => JSON.parse(localStorage.getItem("results") || "[]");
-
-    // --- Auth Form ---
-    function AuthForm({ onLogin }) {
-      const [username, setUsername] = useState("");
-      const handleSubmit = (e) => {
-        e.preventDefault();
-        if (!username.trim()) return alert("Enter username!");
-        saveUser({ username });
-        onLogin({ username });
-      };
-      return (
-        <div className="auth-box">
-          <h2>Login / Register</h2>
-          <form onSubmit={handleSubmit}>
-            <input
-              placeholder="Enter Username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-            />
-            <button type="submit">Enter Platform</button>
-          </form>
-        </div>
-      );
+  <script>
+    function enterPlatform() {
+      const user = document.getElementById('username').value.trim();
+      if (user === "") {
+        alert("Please enter a username!");
+        return;
+      }
+      document.getElementById('login-page').classList.add('hidden');
+      document.getElementById('dashboard').classList.remove('hidden');
     }
-
-    // --- Bet Grid ---
-    function BetGrid({ user }) {
-      const [bet, setBet] = useState(null);
-      const [result, setResult] = useState(null);
-      const [loading, setLoading] = useState(false);
-
-      const playRound = () => {
-        setLoading(true);
-        const rand = Math.floor(Math.random() * 10);
-        const outcome = rand % 2 === 0 ? "EVEN" : "ODD";
-        setTimeout(() => {
-          setLoading(false);
-          setResult(outcome);
-          saveResult({ time: new Date().toLocaleTimeString(), num: rand, outcome });
-        }, 1000);
-      };
-
-      return (
-        <div className="bet-box">
-          <h2>Hello {user.username} 👋</h2>
-          <p>Select your bet and play!</p>
-          <div className="buttons">
-            <button onClick={() => setBet("EVEN")}>Even</button>
-            <button onClick={() => setBet("ODD")}>Odd</button>
-          </div>
-          <button className="play-btn" disabled={!bet || loading} onClick={playRound}>
-            {loading ? "Rolling..." : "Play Round"}
-          </button>
-
-          {result && (
-            <p className="result">
-              🎉 Result: <strong>{result}</strong>
-            </p>
-          )}
-        </div>
-      );
+    function logout() {
+      document.getElementById('dashboard').classList.add('hidden');
+      document.getElementById('login-page').classList.remove('hidden');
     }
-
-    // --- Recent Results ---
-    function RecentResults() {
-      const [results, setResults] = useState([]);
-      useEffect(() => setResults(getResults()), []);
-
-      return (
-        <div className="recent-box">
-          <h3>Recent Results</h3>
-          {results.length === 0 ? (
-            <p>No games played yet.</p>
-          ) : (
-            <ul>
-              {results.slice(-10).reverse().map((r, i) => (
-                <li key={i}>
-                  {r.time} — 🎲 {r.num} → {r.outcome}
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-      );
-    }
-
-    // --- Main App ---
-    function App() {
-      const [user, setUser] = useState(getUser());
-      useEffect(() => { document.title = "DKWin9 Demo Platform"; }, []);
-      return (
-        <div className="app">
-          <header className="header">
-            <h1>🎯 DKWin9 Local Demo</h1>
-            {user && (
-              <button className="logout-btn" onClick={() => { logout(); setUser(null); }}>
-                Logout
-              </button>
-            )}
-          </header>
-
-          {!user ? (
-            <AuthForm onLogin={setUser} />
-          ) : (
-            <>
-              <BetGrid user={user} />
-              <RecentResults />
-            </>
-          )}
-        </div>
-      );
-    }
-
-    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
   </script>
 </body>
 </html>
