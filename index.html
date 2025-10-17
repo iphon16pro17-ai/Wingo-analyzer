@@ -1,198 +1,200 @@
 <!doctype html>
-<html lang="en">
+<html lang="bn">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>DKWin9 — Demo Clone</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Bangla Play — Demo</title>
+
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;500;700;800&display=swap" rel="stylesheet">
 
   <style>
-    /* ====== Reset & base ====== */
+    :root{
+      --bg:#fff8f9;
+      --dark:#0f1724;
+      --card:#ffffff;
+      --accent:#ff4b63;
+      --accent-2:#ff8a66;
+      --muted:#92a0b8;
+    }
     *{box-sizing:border-box}
     html,body{height:100%}
     body{
       margin:0;
-      font-family: 'Inter', system-ui, Arial, sans-serif;
-      background: linear-gradient(180deg,#071026 0%, #0e1a2a 100%);
-      color:#e6eef8;
+      font-family:Inter,system-ui,Arial,sans-serif;
+      background:linear-gradient(180deg,#fff 0%, #fff8f9 100%);
+      color:var(--dark);
       -webkit-font-smoothing:antialiased;
       -moz-osx-font-smoothing:grayscale;
       display:flex;
       justify-content:center;
-      padding:24px 12px;
+      padding:12px;
     }
 
-    /* ====== Container (mobile centered) ====== */
-    .site {
-      width:100%;
-      max-width:420px;
-    }
+    .wrap{width:100%;max-width:420px}
 
-    /* ====== Top header (logo + title + logout) ====== */
-    .top {
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
-      margin-bottom:18px;
+    /* Top header */
+    .header{
+      display:flex;align-items:center;gap:12px;justify-content:space-between;margin-bottom:12px;
     }
-    .brand {
-      display:flex;
-      align-items:center;
-      gap:10px;
-    }
-    .logo {
+    .brand{display:flex;align-items:center;gap:10px}
+    .logo{
       width:44px;height:44px;border-radius:10px;
-      background:linear-gradient(135deg,#ff4957,#ff9a57);
-      display:flex;align-items:center;justify-content:center;
-      box-shadow:0 6px 18px rgba(0,0,0,0.4);
-      font-weight:800;color:#fff;font-size:20px;
+      background:linear-gradient(135deg,var(--accent),var(--accent-2));
+      display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:18px;
+      box-shadow:0 6px 20px rgba(255,75,99,0.12);
     }
-    .title {
-      font-size:20px;
-      line-height:1;
-      font-weight:700;
-    }
-    .logout-btn {
-      background:#ff4666;color:white;border:none;padding:8px 12px;border-radius:10px;
-      box-shadow:0 6px 18px rgba(255,70,102,0.12);cursor:pointer;font-weight:600;
-      display:none; /* shown only when logged in */
-    }
+    .brand .name{font-weight:800;font-size:18px}
+    .top-actions{display:flex;gap:8px;align-items:center}
 
-    /* ====== Card style ====== */
-    .card {
-      background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02));
-      border-radius:16px;
-      padding:18px;
-      box-shadow: 0 6px 24px rgba(2,6,23,0.6);
-      margin-bottom:14px;
-      border: 1px solid rgba(255,255,255,0.03);
+    /* Banner */
+    .banner{
+      border-radius:14px;
+      padding:14px;
+      background:linear-gradient(90deg,#ff5a6b,#ffad7a);
+      color:#fff;margin-bottom:12px;box-shadow:0 10px 30px rgba(255,90,107,0.12);
     }
+    .banner h3{margin:0;font-size:18px;font-weight:800}
+    .banner p{margin:6px 0 0;font-size:13px;opacity:0.95}
 
-    /* ====== Login form ====== */
-    .login h2 { font-size:22px; margin-bottom:8px; color:#fff; }
-    .hint { font-size:13px; color:rgba(230,238,248,0.7); margin-bottom:12px; }
-    .input {
-      width:100%; padding:12px 14px; border-radius:10px; border:1px solid rgba(255,255,255,0.04);
-      background: rgba(255,255,255,0.02); color: #eaf6ff; margin-bottom:10px; font-size:15px;
+    /* categories */
+    .grid{
+      display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px;
     }
-    .input::placeholder{ color: rgba(230,238,248,0.5) }
-    .primary {
-      width:100%; padding:12px; border-radius:10px; border: none;
-      background: linear-gradient(90deg,#2b8af6,#4aa8ff); color:white; font-weight:700;
-      font-size:15px; cursor:pointer;
-      box-shadow: 0 8px 30px rgba(53,139,255,0.18);
+    .cat{
+      background:#fff;border-radius:12px;padding:10px; text-align:center; font-weight:700;
+      box-shadow:0 6px 16px rgba(15,23,42,0.04);
+      font-size:12px;color:var(--dark);
     }
-    .secondary {
-      display:block; text-align:center; margin-top:10px; color:#9fc7ff; font-size:13px; cursor:pointer;
+    .cat .icon{width:44px;height:44px;border-radius:10px;margin:0 auto 6px;display:flex;align-items:center;justify-content:center;font-weight:800;color:#fff}
+    .cat.lot .icon{background:linear-gradient(90deg,#6d5cff,#a07bff)}
+    .cat.slot .icon{background:linear-gradient(90deg,#ffb86b,#ff5a6b)}
+    .cat.pop .icon{background:linear-gradient(90deg,#6ee7b7,#22c55e)}
+    .cat.sport .icon{background:linear-gradient(90deg,#60a5fa,#2563eb)}
+
+    /* home card */
+    .card{
+      background:var(--card);border-radius:14px;padding:14px;margin-bottom:12px;box-shadow:0 10px 30px rgba(2,6,23,0.06)
     }
-
-    /* ====== Dashboard header ====== */
-    .dash-head { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; }
-    .welcome { font-size:18px; font-weight:700; }
-    .sub { color:rgba(230,238,248,0.75); font-size:13px; margin-top:6px }
-
-    /* ====== Balance pill ====== */
-    .balance {
-      display:flex; align-items:center; gap:12px; margin-top:12px;
+    .row{display:flex;gap:8px;align-items:center}
+    .balance{
+      display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;
     }
-    .bal-pill {
-      background: linear-gradient(90deg,#0b8f6a,#22c55e);
-      padding:10px 14px; border-radius:12px; color:white; font-weight:700;
-      box-shadow: 0 6px 18px rgba(34,197,94,0.12);
+    .bal-left{display:flex;gap:10px;align-items:center}
+    .bal-pill{background:linear-gradient(90deg,#0bbf83,#22c55e);color:#fff;padding:8px 12px;border-radius:10px;font-weight:800}
+    .small-muted{color:var(--muted);font-size:12px}
+
+    .bets{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
+    .bet-btn{flex:1 1 calc(50% - 8px);padding:12px;border-radius:10px;border:none;background:linear-gradient(180deg,#fafafa,#fff);font-weight:700;cursor:pointer;box-shadow:inset 0 -2px 0 rgba(0,0,0,0.04)}
+    .bet-btn.primary{background:linear-gradient(90deg,#ff6b7a,#ff9b66);color:#fff;box-shadow:0 8px 20px rgba(255,107,122,0.14)}
+
+    /* recent score strip */
+    .recent-strip{display:flex;gap:8px;overflow:auto;padding-top:8px}
+    .recent-item{min-width:56px;height:56px;border-radius:10px;background:linear-gradient(180deg,#ffffff,#fbfbfb);display:flex;align-items:center;justify-content:center;font-weight:800;box-shadow:0 6px 18px rgba(2,6,23,0.04)}
+
+    /* footer nav */
+    .nav{
+      position:fixed;left:0;right:0;bottom:14px;display:flex;justify-content:center;pointer-events:none;
     }
-
-    /* ====== Bet buttons ====== */
-    .bets { display:flex; gap:10px; flex-wrap:wrap; margin-top:14px; }
-    .bet-btn {
-      flex:1 1 calc(50% - 10px);
-      padding:12px; border-radius:12px; font-weight:700; border:none; cursor:pointer;
-      background:linear-gradient(180deg,rgba(255,255,255,0.03),rgba(255,255,255,0.02));
-      color:#dff2ff; box-shadow: inset 0 -2px 0 rgba(0,0,0,0.25);
-      transition: transform .12s, box-shadow .12s;
+    .nav-inner{width:100%;max-width:420px;background:transparent;display:flex;justify-content:center;pointer-events:auto}
+    .nav-bar{
+      display:flex;gap:18px;background:#fff;border-radius:40px;padding:8px 16px;align-items:center;justify-content:space-between;width:92%;
+      box-shadow:0 12px 40px rgba(2,6,23,0.08)
     }
-    .bet-btn:active { transform: translateY(2px); }
-    .bet-btn.primary { background: linear-gradient(90deg,#2b8af6,#4aa8ff); color:#fff; box-shadow:0 8px 30px rgba(70,150,255,0.12) }
+    .nav-item{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:12px;color:#334155;padding:6px 10px;border-radius:10px;cursor:pointer}
+    .nav-item.active{background:linear-gradient(90deg,#ff6b7a,#ff9b66);color:#fff}
 
-    /* ====== Result display ====== */
-    .result-box { margin-top:12px; display:flex; align-items:center; gap:12px; }
-    .result-num { background:#071827;padding:12px 14px;border-radius:10px;font-weight:800;font-size:20px; }
-    .result-text { font-weight:700; color:#ffd166; }
+    /* utility */
+    input.invite{padding:10px;border-radius:10px;border:1px solid rgba(15,23,42,0.06);flex:1}
+    .btn{padding:10px 12px;border-radius:10px;border:none;background:var(--accent);color:#fff;cursor:pointer;font-weight:700}
+    .muted{color:var(--muted);font-size:13px}
 
-    /* ====== Recent results list ====== */
-    .recent-title { margin-top:6px;color:rgba(230,238,248,0.8); font-size:14px; }
-    .recent-list { display:flex; gap:8px; margin-top:10px; overflow-x:auto; padding-bottom:6px; }
-    .recent-item { min-width:46px; height:46px; border-radius:8px; display:flex;align-items:center;justify-content:center;
-      background:rgba(255,255,255,0.03); font-weight:700; color:#fff; font-size:14px;
-      border:1px solid rgba(255,255,255,0.02);
-    }
-
-    /* ====== Footer small ====== */
-    .small { font-size:12px; color:rgba(230,238,248,0.6); margin-top:8px }
-
-    /* ====== Invite & register row ====== */
-    .row { display:flex; gap:8px; margin-top:8px }
-    .invite {
-      flex:1; padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.04);
-      background: rgba(255,255,255,0.015); color:#eaf6ff;
-    }
-    .tiny { font-size:13px; color:rgba(230,238,248,0.7) }
-
-    /* ====== Responsive tweaks ====== */
-    @media (min-width:540px){
-      .site{max-width:520px}
-      .title{font-size:22px}
+    @media (min-width:600px){
+      .grid{grid-template-columns:repeat(6,1fr)}
+      .nav-bar{width:640px}
     }
   </style>
 </head>
 <body>
-  <div class="site">
-    <!-- Header -->
-    <div class="top">
+  <div class="wrap">
+
+    <!-- header -->
+    <div class="header">
       <div class="brand">
-        <div class="logo">DK</div>
+        <div class="logo">BP</div>
         <div>
-          <div class="title">DKWin9</div>
-          <div class="tiny">Local UI Clone</div>
+          <div class="name">Bangla Play</div>
+          <div class="small-muted">Demo</div>
         </div>
       </div>
-      <button id="logoutBtn" class="logout-btn">Logout</button>
-    </div>
-
-    <!-- LOGIN / REGISTER CARD -->
-    <div id="loginCard" class="card login">
-      <h2>Create account or Login</h2>
-      <div class="hint">Use any username. This is a front-end design-only demo.</div>
-
-      <input id="username" class="input" type="text" placeholder="Username (e.g. rakib)" />
-      <div class="row">
-        <input id="inviteCode" class="invite" type="text" placeholder="Invitation code (optional)" />
-        <button id="pasteBtn" class="primary" style="flex:0 0 110px">Paste</button>
+      <div class="top-actions">
+        <div id="noti" style="font-weight:700;color:var(--accent)">🔔</div>
       </div>
-
-      <button id="enterBtn" class="primary" style="margin-top:12px">Enter Platform</button>
-
-      <div class="secondary" id="needHelp">Need help? <span style="color:#a6d8ff">Contact</span></div>
     </div>
 
-    <!-- DASHBOARD CARD -->
-    <div id="dashCard" class="card" style="display:none;">
-      <div class="dash-head">
+    <!-- big banner -->
+    <div class="banner" id="banner">
+      <h3>Welcome to Bangla Play</h3>
+      <p>Demo platform — explore lottery, slots, casino & more</p>
+    </div>
+
+    <!-- categories -->
+    <div class="grid">
+      <div class="cat pop"><div class="icon">★</div>Popular</div>
+      <div class="cat lot"><div class="icon">10</div>Lottery</div>
+      <div class="cat slot"><div class="icon">777</div>Slots</div>
+      <div class="cat sport"><div class="icon">⚽</div>Sports</div>
+      <div class="cat"><div class="icon">🎰</div>Casino</div>
+      <div class="cat"><div class="icon">🧩</div>Rummy</div>
+      <div class="cat"><div class="icon">🐟</div>Fishing</div>
+      <div class="cat"><div class="icon">✈</div>Others</div>
+    </div>
+
+    <!-- login card -->
+    <div class="card" id="loginCard">
+      <div style="display:flex;justify-content:space-between;align-items:center">
         <div>
-          <div class="welcome" id="welcomeText">Hello, User</div>
-          <div class="sub" id="subText">Play now — quick rounds every minute</div>
+          <div style="font-weight:800;font-size:16px">Sign in / Register</div>
+          <div class="muted" style="margin-top:4px">Use any username for demo</div>
         </div>
-        <div class="tiny">Round <strong id="roundNumber">#0968</strong></div>
       </div>
 
+      <div style="margin-top:12px" class="row">
+        <input id="userInput" class="invite" placeholder="Enter username"/>
+        <button id="pasteInvite" class="btn">Paste</button>
+      </div>
+      <div style="margin-top:10px" class="row">
+        <input id="inviteInput" class="invite" placeholder="Invitation code (optional)"/>
+        <button id="enterBtn" class="btn">Enter</button>
+      </div>
+      <div style="margin-top:10px" class="muted">By entering you accept demo terms (no real money).</div>
+    </div>
+
+    <!-- dashboard -->
+    <div class="card" id="dashCard" style="display:none;">
       <div class="balance">
-        <div class="bal-pill" id="balanceVal">$ 1,000.00</div>
-        <div style="margin-left:auto;text-align:right">
-          <div class="tiny">Wallet</div>
-          <div class="small">ID: <span id="userId">—</span></div>
+        <div class="bal-left">
+          <div style="display:flex;flex-direction:column">
+            <div style="font-weight:800" id="welcomeText">Hello, User</div>
+            <div class="small-muted">Good luck — quick rounds</div>
+          </div>
+        </div>
+        <div style="text-align:right">
+          <div class="small-muted">Balance</div>
+          <div class="bal-pill" id="balVal">$ 1,000</div>
         </div>
       </div>
 
-      <div style="margin-top:12px" class="tiny">Place your bet</div>
+      <div class="row" style="margin-top:12px">
+        <div style="flex:1">
+          <input id="betAmount" placeholder="Amount" class="invite" />
+        </div>
+        <div>
+          <button id="betBtn" class="bet-btn primary">BET</button>
+        </div>
+      </div>
+
+      <div style="margin-top:12px" class="muted">Quick bets</div>
       <div class="bets">
         <button class="bet-btn" data-bet="small">Small</button>
         <button class="bet-btn" data-bet="big">Big</button>
@@ -200,185 +202,223 @@
         <button class="bet-btn primary" data-bet="odd">Odd</button>
       </div>
 
-      <div class="result-box" aria-live="polite">
-        <div class="result-num" id="lastNum">—</div>
+      <div class="result-box" style="margin-top:12px;display:flex;align-items:center;gap:12px">
+        <div style="font-weight:800;font-size:20px" id="lastNum">—</div>
+        <div style="flex:1">
+          <div class="small-muted">Latest result</div>
+          <div id="lastText" style="font-weight:800;color:#ff8a66">—</div>
+        </div>
         <div>
-          <div class="tiny">Latest result</div>
-          <div class="result-text" id="lastText">—</div>
+          <button id="manualBtn" class="btn">Manual</button>
         </div>
       </div>
 
-      <div class="recent-title">Recent Results</div>
-      <div class="recent-list" id="recentList" aria-hidden="false">
-        <!-- recent items injected here -->
+      <div class="recent-title" style="margin-top:12px">Recent Results</div>
+      <div class="recent-strip" id="recentStrip" style="margin-top:8px">
+        <!-- injected -->
       </div>
+    </div>
 
-      <div style="margin-top:12px;display:flex;gap:8px;align-items:center">
-        <input id="manualNum" class="invite" placeholder="Manual result (0-9)" />
-        <button id="applyNum" class="primary" style="flex:0 0 120px">Apply</button>
+    <!-- admin/demo manual modal (hidden) -->
+    <div id="manualModal" style="display:none;position:fixed;left:0;right:0;top:0;bottom:0;align-items:center;justify-content:center;background:rgba(0,0,0,0.4)">
+      <div style="background:#fff;padding:16px;border-radius:12px;max-width:360px;margin:24px auto">
+        <div style="font-weight:800;margin-bottom:8px">Apply result (0-9)</div>
+        <input id="manualNum" placeholder="Enter 0-9" style="width:100%;padding:10px;border-radius:8px;border:1px solid #e6e6e6" />
+        <div style="display:flex;gap:8px;margin-top:10px;justify-content:flex-end">
+          <button id="closeManual" class="btn" style="background:#94a3b8">Close</button>
+          <button id="applyManual" class="btn">Apply</button>
+        </div>
       </div>
-
-      <div class="small">This is a UI prototype. Real payouts & server not included.</div>
     </div>
 
   </div>
 
+  <!-- bottom nav -->
+  <div class="nav" aria-hidden="false">
+    <div class="nav-inner">
+      <div class="nav-bar">
+        <div class="nav-item active" data-nav="home">🏠<div>Home</div></div>
+        <div class="nav-item" data-nav="activity">🕑<div>Activity</div></div>
+        <div class="nav-item" data-nav="promo">🎁<div>Promo</div></div>
+        <div class="nav-item" data-nav="wallet">👛<div>Wallet</div></div>
+        <div class="nav-item" data-nav="account">👤<div>Account</div></div>
+      </div>
+    </div>
+  </div>
+
   <script>
-    /* ====== Simple UI logic (front-end only) ====== */
     (function(){
-      const enterBtn = document.getElementById('enterBtn');
+      // keys
+      const KEY_USER = 'bp_demo_user_v1';
+      const KEY_RECENT = 'bp_demo_recent_v1';
+      const KEY_BAL = 'bp_demo_bal_v1';
+
+      // elements
       const loginCard = document.getElementById('loginCard');
       const dashCard = document.getElementById('dashCard');
-      const usernameInput = document.getElementById('username');
-      const inviteInput = document.getElementById('inviteCode');
+      const userInput = document.getElementById('userInput');
+      const inviteInput = document.getElementById('inviteInput');
+      const pasteInvite = document.getElementById('pasteInvite');
+      const enterBtn = document.getElementById('enterBtn');
       const welcomeText = document.getElementById('welcomeText');
-      const balanceVal = document.getElementById('balanceVal');
-      const userIdSpan = document.getElementById('userId');
-      const logoutBtn = document.getElementById('logoutBtn');
-      const recentList = document.getElementById('recentList');
+      const balVal = document.getElementById('balVal');
+      const recentStrip = document.getElementById('recentStrip');
       const lastNum = document.getElementById('lastNum');
       const lastText = document.getElementById('lastText');
+      const manualBtn = document.getElementById('manualBtn');
+      const manualModal = document.getElementById('manualModal');
+      const closeManual = document.getElementById('closeManual');
+      const applyManual = document.getElementById('applyManual');
       const manualNum = document.getElementById('manualNum');
-      const applyNum = document.getElementById('applyNum');
-      const pasteBtn = document.getElementById('pasteBtn');
-
-      // local demo storage keys
-      const S_KEY_USER = 'dkw_ui_user_v1';
-      const S_KEY_RECENT = 'dkw_ui_recent_v1';
-      const S_KEY_BAL = 'dkw_ui_bal_v1';
-      const S_KEY_ROUND = 'dkw_ui_round_v1';
+      const betAmount = document.getElementById('betAmount');
+      const betBtn = document.getElementById('betBtn');
 
       // helpers
-      function $(id){ return document.getElementById(id) }
-      function save(key, val){ localStorage.setItem(key, JSON.stringify(val)) }
-      function load(key, def){ const v = localStorage.getItem(key); return v ? JSON.parse(v) : def }
+      function load(key, def){ const v=localStorage.getItem(key); return v ? JSON.parse(v) : def }
+      function save(key, val){ localStorage.setItem(key, JSON.stringify(val)); }
+      function randInt(max){ return Math.floor(Math.random()*max); }
 
       // init
-      const savedUser = load(S_KEY_USER, null);
-      const savedRecent = load(S_KEY_RECENT, []);
-      const savedBal = load(S_KEY_BAL, 1000);
-      const savedRound = load(S_KEY_ROUND, 968);
+      let user = load(KEY_USER, null);
+      let recent = load(KEY_RECENT, []);
+      let bal = load(KEY_BAL, 1000);
 
-      // render recent
       function renderRecent(){
-        recentList.innerHTML = '';
-        const arr = load(S_KEY_RECENT, []);
-        if(arr.length === 0){
-          const el = document.createElement('div'); el.className='recent-item'; el.textContent='—'; recentList.appendChild(el);
+        recentStrip.innerHTML = '';
+        if(!recent.length){
+          for(let i=0;i<6;i++){
+            const el = document.createElement('div'); el.className='recent-item'; el.textContent='—';
+            recentStrip.appendChild(el);
+          }
+          lastNum.textContent='—'; lastText.textContent='—';
           return;
         }
-        arr.slice(0, 12).forEach(it => {
-          const d = document.createElement('div'); d.className='recent-item';
-          d.textContent = it;
-          recentList.appendChild(d);
-        })
+        recent.slice(0,12).forEach(n=>{
+          const el = document.createElement('div'); el.className='recent-item'; el.textContent=n;
+          recentStrip.appendChild(el);
+        });
+        lastNum.textContent = recent[0];
+        lastText.textContent = (recent[0]%2===0)?'EVEN':'ODD';
+        lastText.style.color = (recent[0]%2===0)?'#0bbf83':'#ff8a66';
       }
 
-      function updateResultDisplay(n){
-        lastNum.textContent = n;
-        lastText.textContent = (n % 2 === 0) ? 'EVEN' : 'ODD';
-        // color tweak for visual effect
-        lastText.style.color = (n % 2 === 0) ? '#6ee7b7' : '#ffd166';
+      function enterPlatform(){
+        const name = (userInput.value||'').trim();
+        if(!name){ alert('Username দিন'); userInput.focus(); return; }
+        const invite = (inviteInput.value||'').trim() || ('INV'+randInt(999999));
+        user = {name, invite};
+        save(KEY_USER, user);
+        save(KEY_BAL, bal);
+        showDashboard();
       }
 
-      // set round number UI
-      function setRound(num){
-        const rn = document.getElementById('roundNumber');
-        rn.textContent = '#'+(num || 0);
-        save(S_KEY_ROUND, num);
-      }
-
-      // show dashboard for user
-      function showDashboard(user){
-        welcomeText.textContent = 'Hello, ' + (user.name || user.username || user);
-        userIdSpan.textContent = (user.invite || '—');
-        balanceVal.textContent = '$ ' + Number(load(S_KEY_BAL, savedBal)).toFixed(2);
-        loginCard.style.display = 'none';
-        dashCard.style.display = 'block';
-        logoutBtn.style.display = 'inline-block';
+      function showDashboard(){
+        welcomeText.textContent = 'Hello, '+(user.name||user);
+        balVal.textContent = '$ '+Number(bal).toFixed(2);
+        loginCard.style.display='none';
+        dashCard.style.display='block';
         renderRecent();
-        setRound(load(S_KEY_ROUND, savedRound));
-        // if there is a last recent, show it
-        const arr = load(S_KEY_RECENT, []);
-        if(arr.length) updateResultDisplay(arr[0]);
       }
 
-      // login flow
-      enterBtn.addEventListener('click', function(){
-        const name = usernameInput.value.trim();
-        if(!name){ alert('Please enter a username'); usernameInput.focus(); return; }
-        const invite = inviteInput.value.trim() || ('INV'+Math.floor(Math.random()*999999));
-        const userObj = { username: name, invite };
-        save(S_KEY_USER, userObj);
-        save(S_KEY_BAL, savedBal);
-        showDashboard(userObj);
-      });
+      function logout(){
+        user=null; localStorage.removeItem(KEY_USER);
+        loginCard.style.display='block'; dashCard.style.display='none';
+      }
 
-      // paste invite quick action (demo)
-      pasteBtn.addEventListener('click', function(){
-        inviteInput.value = '115271240235';
-      });
+      // paste invite
+      pasteInvite.addEventListener('click', ()=> inviteInput.value='115271240235');
 
-      // logout
-      logoutBtn.addEventListener('click', function(){
-        localStorage.removeItem(S_KEY_USER);
-        loginCard.style.display = 'block';
-        dashCard.style.display = 'none';
-        logoutBtn.style.display = 'none';
-      });
+      // enter
+      enterBtn.addEventListener('click', enterPlatform);
 
-      // bet buttons (visual only)
-      document.querySelectorAll('.bet-btn').forEach(btn => {
-        btn.addEventListener('click', function(){
-          // highlight pressed
-          document.querySelectorAll('.bet-btn').forEach(b=>b.classList.remove('active'));
-          this.classList.add('active');
-          // visual feedback (no server)
-          this.animate([{ transform:'translateY(0)'},{ transform:'translateY(-6px)'},{ transform:'translateY(0)'}], {duration:300});
-        })
-      });
-
-      // manual apply number (simulate result)
-      applyNum.addEventListener('click', function(){
+      // manual modal
+      manualBtn.addEventListener('click', ()=> manualModal.style.display='flex');
+      closeManual.addEventListener('click', ()=> manualModal.style.display='none');
+      applyManual.addEventListener('click', ()=>{
         const v = manualNum.value.trim();
-        if(v === '' || isNaN(v) || v < 0 || v > 9){ alert('Enter a number 0-9'); manualNum.focus(); return; }
+        if(v === '' || isNaN(v) || v<0 || v>9){ alert('0-9 সংখ্যা লিখুন'); manualNum.focus(); return; }
         const n = Number(v);
-        const arr = load(S_KEY_RECENT, []);
-        arr.unshift(n);
-        if(arr.length>30) arr.pop();
-        save(S_KEY_RECENT, arr);
-        save(S_KEY_ROUND, (load(S_KEY_ROUND, savedRound) + 1));
+        recent.unshift(n);
+        if(recent.length>30) recent.pop();
+        save(KEY_RECENT, recent);
+        save(KEY_BAL, bal);
         renderRecent();
-        updateResultDisplay(n);
-        // small confetti-like effect (simple)
-        flashResult();
+        manualNum.value='';
+        manualModal.style.display='none';
       });
 
-      // small animation on result apply
-      function flashResult(){
-        const el = lastNum;
-        el.animate([
-          { transform:'scale(1)', boxShadow:'0 0 0 rgba(0,0,0,0)'},
-          { transform:'scale(1.08)', boxShadow:'0 12px 40px rgba(0,0,0,0.4)'},
-          { transform:'scale(1)', boxShadow:'0 0 0 rgba(0,0,0,0)'}
-        ], {duration:420});
-      }
+      // quick bet action
+      document.querySelectorAll('.bet-btn').forEach(b=>{
+        b.addEventListener('click', ()=>{
+          document.querySelectorAll('.bet-btn').forEach(x=>x.classList.remove('active'));
+          b.classList.add('active');
+        })
+      });
 
-      // load saved user
-      if(savedUser){
-        showDashboard(savedUser);
-      } else {
+      // Bet btn (demo: places bet and random result)
+      betBtn.addEventListener('click', ()=>{
+        if(!user){ alert('প্রথমে লগইন করুন'); return; }
+        const amt = Number(betAmount.value||0);
+        if(!amt || amt<=0){ alert('বেট Amount ঠিক করুন'); betAmount.focus(); return; }
+        // demo: decrease balance, generate random result
+        if(amt > bal){ alert('Balance কম আছে'); return; }
+        bal = Number((bal - amt).toFixed(2));
+        const n = randInt(10);
+        recent.unshift(n);
+        if(recent.length>30) recent.pop();
+        save(KEY_RECENT, recent);
+        save(KEY_BAL, bal);
+        balVal.textContent = '$ '+Number(bal).toFixed(2);
+        renderRecent();
+        // fake payout: if guessed parity matches active selected
+        const active = document.querySelector('.bet-btn.active');
+        if(active){
+          const betType = active.getAttribute('data-bet');
+          let win = false;
+          if(betType === 'even' && n%2===0) win = true;
+          if(betType === 'odd' && n%2===1) win = true;
+          if(betType === 'small' && n<=4) win = true;
+          if(betType === 'big' && n>=5) win = true;
+          if(win){
+            const payout = amt * 1.9; // demo multiplier
+            bal = Number((bal + payout).toFixed(2));
+            save(KEY_BAL, bal);
+            balVal.textContent = '$ '+Number(bal).toFixed(2);
+            alert('WIN! Payout: $'+payout.toFixed(2));
+          } else {
+            // lose
+          }
+        } else {
+          alert('Bet placed (demo). Result: '+n);
+        }
+      });
+
+      // if user already saved
+      if(user){ showDashboard() } else {
         renderRecent();
       }
 
-      // quick keyboard enter to login on mobile
-      usernameInput.addEventListener('keydown', function(e){
-        if(e.key === 'Enter') enterBtn.click();
+      // bottom nav interactions (just visual)
+      document.querySelectorAll('.nav-item').forEach(item=>{
+        item.addEventListener('click', ()=>{
+          document.querySelectorAll('.nav-item').forEach(i=>i.classList.remove('active'));
+          item.classList.add('active');
+          // if account clicked and not logged in, scroll to login
+          if(item.getAttribute('data-nav') === 'account' && !user){
+            window.scrollTo({top:0,behavior:'smooth'});
+          }
+        })
       });
 
-      // prefill demo recent (only if empty)
-      if(load(S_KEY_RECENT, []).length === 0){
-        save(S_KEY_RECENT, [8,3,0,7,4,0,1].map(n=>n));
+      // quick keyboard for enter
+      userInput.addEventListener('keydown',(e)=>{ if(e.key==='Enter') enterPlatform(); });
+      inviteInput.addEventListener('keydown',(e)=>{ if(e.key==='Enter') enterPlatform(); });
+
+      // default demo recent if empty
+      if(!recent.length){
+        recent = [8,3,0,7,4,0,1];
+        save(KEY_RECENT, recent);
+        renderRecent();
       }
 
     })();
